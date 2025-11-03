@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.oink.ui.loginApp.LoginScreen
+import com.example.oink.ui.registerApp.RegisterScreen
 import com.example.oink.ui.startAplication.SplashScreen
 import com.example.oink.ui.startAplication.StartUpScreen
 
@@ -24,7 +26,32 @@ fun AppNavGraph(navController : NavHostController ){
             )
         }
         composable(NavRoutes.Onboarding.route) {
-            StartUpScreen { navController.navigate(NavRoutes.Onboarding.route) }
+            StartUpScreen(
+                onRegisterClick = {
+                    navController.navigate(NavRoutes.Register.route) {
+                        popUpTo(NavRoutes.Onboarding.route)
+                    }
+                },
+                onLoginClick = {
+                    navController.navigate(NavRoutes.Login.route) {
+                        popUpTo(NavRoutes.Onboarding.route)
+                    }
+                }
+            )
+        }
+        composable(NavRoutes.Login.route) {
+            LoginScreen(
+                onBackClick = {
+                navController.popBackStack()
+                }
+            )
+        }
+        composable(NavRoutes.Register.route) {
+            RegisterScreen (
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }
