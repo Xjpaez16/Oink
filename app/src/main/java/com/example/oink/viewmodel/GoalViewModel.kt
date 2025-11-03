@@ -1,8 +1,8 @@
 package com.example.oink.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
+//import androidx.lifecycle.viewModelScope
+//import kotlinx.coroutines.launch
 // import com.google.firebase.firestore.FirebaseFirestore
 class GoalViewModel : ViewModel() {
 
