@@ -80,7 +80,7 @@ fun GoalScreen(
                 onClick = onClose,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .offset(x = 20.dp, y = (-20).dp) // opcional, para "sacarlo" un poquito más
+                    .offset(x = 25.dp, y = (-25).dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
