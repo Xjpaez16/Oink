@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="DatePickerTheme"  parent="android:Theme.Material.Light.Dialog">
+        <item name="colorPrimary">#2997FD</item>
+        <item name="colorAccent">#2997FD</item>
+        <item name="android:colorAccent">#2997FD</item>
+        <item name="android:colorControlActivated">#2997FD</item>
+        <item name="android:datePickerDialogTheme">@style/DatePickerDialogTheme</item>
+    </style>
 
+    <style name="DatePickerDialogTheme" parent="android:Theme.Material.Light.Dialog">
+        <item name="android:colorAccent">#2997FD</item>
+        <item name="android:colorControlActivated">#2997FD</item>
+    </style>
     <style name="Theme.Oink" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

@@ -1,4 +1,4 @@
-package com.example.oink.ui.Components
+package com.example.oink.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
