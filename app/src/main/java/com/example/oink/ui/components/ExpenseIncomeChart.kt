@@ -66,7 +66,7 @@ fun ExpenseChart(
                 Box(
                     modifier = Modifier
                         .width(55.dp) // Ancho FIJO, no se reduce
-                        .height(barHeight.dp) // Solo la altura se reduce
+                         // Solo la altura se reduce
                         .background(
                             color = if (hasData) Color(0xFF2997FD) else Color.Black.copy(alpha = 0.05f),
                             shape = RoundedCornerShape(20.dp)
@@ -79,6 +79,7 @@ fun ExpenseChart(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Bottom,
                             modifier = Modifier.padding(4.dp)
+                                .height(barHeight.dp)
                         ) {
                             Icon(
                                 painter = painterResource(id = movement.category.icon),

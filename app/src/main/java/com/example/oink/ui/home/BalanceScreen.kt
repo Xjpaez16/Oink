@@ -23,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavController
 import com.example.oink.ui.components.MovementItem
 import com.example.oink.ui.theme.robotoBoldStyle
 import com.example.oink.ui.theme.robotoExtraBoldStyle
@@ -36,7 +37,8 @@ fun BalanceScreen(
     viewModel: BalanceViewModel = viewModel(),
     userName: String,
     onNavigateToIncome: () -> Unit,
-    onNavigateToExpenses: () -> Unit
+    onNavigateToExpenses: () -> Unit,
+    navController: NavController
 ) {
     val movements = remember { viewModel.getAllMovements() }
     val balance = remember { viewModel.getTotalBalance() }
@@ -51,7 +53,7 @@ fun BalanceScreen(
     }
 
     Scaffold(
-        bottomBar = { BottomNavBar() },
+        bottomBar = { BottomNavBar(navController) },
         containerColor = Color.White
     ) { padding ->
         Column(

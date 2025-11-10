@@ -1,4 +1,4 @@
-package com.example.oink.ui.expense
+package com.example.oink.ui.income
 
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.BorderStroke
@@ -47,10 +47,10 @@ import com.example.oink.ui.theme.robotoMediumStyle
 import com.example.oink.viewmodel.ExpenseIncomeViewModel
 
 @Composable
-fun ExpenseScreen(
+fun IncomeScreen(
     type: MovementType, // INCOME o EXPENSE
     viewModel: ExpenseIncomeViewModel = viewModel(),
-    onNavigateToIncome: () -> Unit,
+    onNavigateToExpense: () -> Unit,
     navController: NavController
 ) {
     val context = LocalContext.current
@@ -68,7 +68,7 @@ fun ExpenseScreen(
     }
 
     val movements = viewModel.movements
-    val t_expense = remember { viewModel.getTotalByType(type) }
+    val t_income = remember { viewModel.getTotalByType(type) }
 
     Scaffold(
         bottomBar = { BottomNavBar(navController) },
@@ -122,21 +122,22 @@ fun ExpenseScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedButton(
-                        onClick = {},
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = Color(0xFF2997FD),
-                            contentColor = Color.White
-                        ),
-                        border = BorderStroke(2.dp, Color.White),
+                        onClick = onNavigateToExpense,
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF2997FD)),
+                        border = BorderStroke(2.dp, Color(0xFF2997FD)),
+
                         shape = RoundedCornerShape(20.dp)
                     ) {
                         Text("− Gastos")
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     OutlinedButton(
-                        onClick = onNavigateToIncome,
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF2997FD)),
-                        border = BorderStroke(2.dp, Color(0xFF2997FD)),
+                        onClick = {},
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = Color(0xFF2997FD),
+                            contentColor = Color.White
+                        ),
+                        border = BorderStroke(2.dp, Color.White),
                         shape = RoundedCornerShape(20.dp)
                     ) {
                         Text("+ Ingresos")
@@ -151,7 +152,7 @@ fun ExpenseScreen(
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = "Total de gastos",
+                        text = "Total de ingresos",
                         style = robotoMediumStyle(
                             fontSize = 24.sp,
                             color = Color.Black
@@ -159,7 +160,7 @@ fun ExpenseScreen(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "$${"%,.0f".format(t_expense)}",
+                        text = "$${"%,.0f".format(t_income)}",
                         style = robotoExtraBoldStyle(
                             fontSize = 55.sp,
                             color = Color(0xFF0D3685)

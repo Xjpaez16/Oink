@@ -11,6 +11,7 @@ import com.example.oink.data.model.MovementType
 import com.example.oink.data.model.User
 import com.example.oink.ui.expense.ExpenseScreen
 import com.example.oink.ui.home.BalanceScreen
+import com.example.oink.ui.income.IncomeScreen
 import com.example.oink.ui.loginApp.LoginScreen
 import com.example.oink.ui.registerApp.RegisterScreen
 import com.example.oink.ui.startAplication.SplashScreen
@@ -87,7 +88,8 @@ fun AppNavGraph(navController : NavHostController ){
                     viewModel = balanceViewModel,
                     userName = user.name,
                     onNavigateToIncome = { navController.navigate(NavRoutes.Income.route) },
-                    onNavigateToExpenses = { navController.navigate(NavRoutes.Expenses.route) }
+                    onNavigateToExpenses = { navController.navigate(NavRoutes.Expenses.route) },
+                    navController = navController
                 )
             }
         }
@@ -96,13 +98,16 @@ fun AppNavGraph(navController : NavHostController ){
                 type = MovementType.EXPENSE,
                 viewModel = expenseIncomeViewModel,
                 onNavigateToIncome = { navController.navigate(NavRoutes.Income.route) },
+                navController = navController,
             )
         }
         composable(NavRoutes.Income.route) {
-            //IncomeScreen(
-               // viewModel = balanceViewModel,
-               // onBackClick = { navController.popBackStack() }
-           // )
+            IncomeScreen(
+                type = MovementType.INCOME,
+                viewModel = expenseIncomeViewModel,
+                onNavigateToExpense = { navController.navigate(NavRoutes.Expenses.route) },
+                navController = navController,
+            )
         }
 
     }

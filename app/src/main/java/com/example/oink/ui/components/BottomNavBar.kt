@@ -10,11 +10,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.oink.R
+import com.example.oink.ui.navigation.NavRoutes
 
 @Composable
 fun BottomNavBar(
-    onItemSelected: (String) -> Unit = {}
+
+    navController: NavController
 ) {
     var selected by remember { mutableStateOf("home") }
 
@@ -32,7 +35,13 @@ fun BottomNavBar(
             ) },
             selected = selected == "home",
 
-            onClick = { selected = "home"; onItemSelected("home") },
+            onClick = {
+                selected = "home"
+                navController.navigate(NavRoutes.Home.route) {
+                    popUpTo(NavRoutes.Home.route) { inclusive = true }
+                    launchSingleTop = true
+                }
+            },
             label = { Text("Inicio") }
         )
         NavigationBarItem(
@@ -43,7 +52,7 @@ fun BottomNavBar(
                 modifier = Modifier.size(24.dp)
             )  },
             selected = selected == "stats",
-            onClick = { selected = "stats"; onItemSelected("stats") },
+            onClick = { selected = "stats"; },
             label = { Text("Reportes") },
             
         )
@@ -55,7 +64,7 @@ fun BottomNavBar(
                 modifier = Modifier.size(24.dp)
             ) },
             selected = selected == "achievements",
-            onClick = { selected = "achievements"; onItemSelected("achievements") },
+            onClick = { selected = "achievements";  },
             label = { Text("Logros") }
         )
         NavigationBarItem(
@@ -66,14 +75,10 @@ fun BottomNavBar(
                 modifier = Modifier.size(24.dp)
             ) },
             selected = selected == "calendar",
-            onClick = { selected = "calendar"; onItemSelected("calendar") },
+            onClick = { selected = "calendar"; },
             label = { Text("Calendario") }
         )
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewBottomNavBar() {
-    BottomNavBar()
-}
+
