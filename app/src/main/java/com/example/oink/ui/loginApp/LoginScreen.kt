@@ -19,7 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.oink.ui.Components.TextFieldWithLabel
+import com.example.oink.ui.components.TextFieldWithLabel
 import com.example.oink.ui.theme.robotoBoldStyle
 import com.example.oink.R
 
@@ -55,8 +55,8 @@ fun LoginScreen(
                     bitmap = it,
                     contentDescription = "Logo Oink",
                     modifier = Modifier
-                        .width(303.dp)
-                        .height(202.dp)
+                        .width(230.dp)
+                        .height(190.dp)
                         .offset(y = (-70).dp)
                 )
             }

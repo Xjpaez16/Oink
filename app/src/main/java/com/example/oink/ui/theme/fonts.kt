@@ -70,3 +70,9 @@ fun robotoBoldStyle(
     fontSize: TextUnit = 16.sp,
     color: Color = Color.Black
 ) = appFontStyle("Roboto-Bold.ttf", fontSize, FontWeight.Bold, color)
+
+@Composable
+fun robotoExtraBoldStyle(
+    fontSize: TextUnit = 16.sp,
+    color: Color = Color.Black
+) = appFontStyle("Roboto-ExtraBold.ttf", fontSize, FontWeight.Bold, color)

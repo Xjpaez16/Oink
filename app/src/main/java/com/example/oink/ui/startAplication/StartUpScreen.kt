@@ -75,8 +75,8 @@ fun StartUpScreen(
                     bitmap = it,
                     contentDescription = "Logo Oink",
                     modifier = Modifier
-                        .width(180.dp)
-                        .height(120.dp)
+                        .width(120.dp)
+                        .height(70.dp)
                         .offset(y = (-70).dp)
                 )
             }
