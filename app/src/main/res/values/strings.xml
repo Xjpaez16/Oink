@@ -1,3 +1,109 @@
 <resources>
     <string name="app_name">Oink</string>
+
+    <!-- ACCESIBILIDAD Y GENERALES -->
+    <string name="desc_logo">Logo Oink</string>
+    <string name="desc_settings">Configuración</string>
+    <string name="desc_add">Agregar</string>
+    <string name="desc_close">Cerrar</string>
+    <string name="desc_arrow_right">Flecha derecha</string>
+    <string name="desc_splash_logo">Logo de bienvenida</string>
+    <string name="desc_translate">Traducir idioma</string>
+    <string name="desc_main_image">Imagen principal</string>
+    <string name="desc_lock">Contraseña</string>
+    <string name="desc_email">Correo</string>
+    <string name="desc_date">Calendario</string>
+    <string name="desc_account">Perfil</string>
+    <string name="btn_cancel">Cancelar</string>
+    <string name="btn_save">Guardar</string>
+    <string name="btn_ok">OK</string>
+
+    <!-- BARRA DE NAVEGACIÓN (BottomNavBar.kt) -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_reports">Reportes</string>
+    <string name="nav_goals">Logros</string>
+    <string name="nav_calendar">Calendario</string>
+
+    <!-- COMPONENTES GRÁFICOS (Charts) -->
+    <string name="chart_new_month_msg">Nuevo mes, añade un movimiento</string>
+    <string name="pie_income">Ingresos</string>
+    <string name="pie_expenses">Gastos</string>
+    <string name="loading_default">Cargando...</string>
+
+    <!-- PANTALLAS DE INICIO (Splash & StartUp) -->
+    <string name="slogan">Tu mejor compañía financiera</string>
+    <string name="btn_register_me">Registrarse</string>
+    <string name="btn_have_account">Ya tengo una cuenta</string>
+
+    <!-- LOGIN Y REGISTRO -->
+    <string name="label_email">Correo</string>
+    <string name="label_password">Contraseña</string>
+    <string name="label_name">Nombre</string>
+    <string name="label_birthdate">Fecha de nacimiento</string>
+    <string name="btn_login_action">Iniciar Sesión</string>
+    <string name="btn_register_action">Registrarse</string>
+    <string name="msg_creating_account">Creando tu cuenta...</string>
+    <string name="msg_register_success">¡Registro exitoso! Bienvenido a Oink...</string>
+
+    <!-- HOME / BALANCE (BalanceScreen.kt) -->
+    <string name="greeting_mr">Hola Sr %1$s</string> <!-- %1$s es el nombre del usuario -->
+    <string name="balance_subtitle">Echa un vistazo a tus finanzas</string>
+    <string name="balance_label">Balance</string>
+    <string name="btn_minus_expenses">− Gastos</string>
+    <string name="btn_plus_income">+ Ingresos</string>
+
+    <!-- LISTAS DE GASTOS E INGRESOS -->
+    <string name="total_expenses_label">Total de gastos</string>
+    <string name="total_income_label">Total de ingresos</string>
+
+    <!-- INGRESAR DINERO/GASTOS -->
+    <string name="title_expenses_entry">Gastos</string>
+    <string name="title_income_entry">Ingresos</string>
+    <string name="hint_description">Descripción</string>
+    <string name="hint_amount">Monto</string>
+    <string name="date_button_format">Fecha: %1$s</string>
+    <string name="date_button_placeholder">📅</string>
+    <string name="category_selected_format">Seleccionaste: %1$s</string>
+    <string name="category_none">Ninguna</string>
+
+    <!-- CATEGORÍAS -->
+    <string name="cat_transport">Transporte</string>
+    <string name="cat_home">Hogar</string>
+    <string name="cat_personal">Personal</string>
+    <string name="cat_gifts">Regalos</string>
+    <string name="cat_luxury">Lujos</string>
+    <string name="cat_food">Comida</string>
+    <string name="cat_membership">Membresias</string>
+    <string name="cat_vehicles">Vehiculos</string>
+    <string name="cat_work">Trabajo</string>
+    <string name="cat_bank">Banco</string>
+
+    <!-- METAS Y LOGROS -->
+    <string name="goals_title">Metas</string>
+    <string name="goals_subtitle">Plantemos semillas para crecer</string>
+    <string name="goal_deposit_subtitle">Avanza en tu meta tanto como puedas</string>
+    <string name="desc_add_goal">Agregar meta</string>
+    <string name="label_goal_name">Nombre</string>
+    <string name="label_goal_price">Precio</string>
+    <string name="label_amount">Monto</string>
+
+    <!-- Placeholders de Metas -->
+    <string name="placeholder_guitar">Guitarra</string>
+    <string name="placeholder_price_large">1200000</string>
+    <string name="placeholder_price_formatted">1.200.000</string>
+    <string name="goal_progress_format">%1$s de %2$s</string>
+
+    <!-- REPORTES -->
+    <string name="report_header">Informe</string>
+    <string name="report_subtitle">Aquí podrás ver cómo se ha utilizado tu dinero</string>
+    <string name="label_from">Desde :</string>
+    <string name="label_to">Hasta :</string>
+    <string name="chart_placeholder_text">Gráfica aquí</string>
+    <string name="report_total_expenses">Gastos totales :</string>
+    <string name="report_total_income">Ingresos totales :</string>
+    <string name="report_spent_most">Gastaste más en:</string>
+    <string name="report_earned_most">Generaste más ingresos en:</string>
+
+    <!-- CALENDARIO -->
+    <string name="date_selected_label">Fecha seleccionada: %1$s</string>
 </resources>
