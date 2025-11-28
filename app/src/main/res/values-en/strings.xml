@@ -45,7 +45,7 @@
     <string name="btn_register_action">Sign Up</string>
     <string name="msg_creating_account">Creating your account...</string>
     <string name="msg_register_success">Registration successful! Welcome to Oink...</string>
-
+    <string name="btn_google">Continue with Google</string>
     <!-- HOME / BALANCE -->
     <string name="greeting_mr">Hello Mr %1$s</string>
     <string name="balance_subtitle">Take a look at your finances</string>

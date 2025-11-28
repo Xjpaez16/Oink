@@ -16,9 +16,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.oink.R
 import com.example.oink.data.model.Movement
-import com.example.oink.data.model.MovementType
-import com.example.oink.data.model.Subcategory
 import com.example.oink.viewmodel.ExpenseIncomeViewModel
 
 @Composable
@@ -28,7 +27,6 @@ fun ExpenseChart(
 ) {
     val movements = viewModel.movements
     val hasData = movements.isNotEmpty()
-    val emptySubcategory = Subcategory(name = "", icon = 0)
 
     // Factor para reducir solo la ALTURA de las barras
     // Se reduce gradualmente hasta desaparecer cuando scrollOffset >= 800
@@ -48,16 +46,22 @@ fun ExpenseChart(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.Bottom
         ) {
+            // 1. CORRECCIÓN: Constructor actualizado de Movement para datos vacíos
             val bars = if (hasData) movements else List(4) {
-                Movement(0, 0.0, "", "", emptySubcategory, MovementType.NONE)
+                Movement(id = "dummy", amount = 0, category = "", type = "NONE")
             }
 
-            val maxAmount = (movements.maxOfOrNull { it.amount } ?: 1.0)
+            // 2. CORRECCIÓN: Convertir Long a Double para cálculos matemáticos
+            val maxAmount = (movements.maxOfOrNull { it.amount } ?: 1).toDouble()
 
             bars.forEachIndexed { index, movement ->
+
+                // Convertimos el monto a Double para usarlo en la UI
+                val amountDouble = movement.amount.toDouble()
+
                 // Calculamos la altura base de la barra
                 val baseHeight = if (hasData) {
-                    (movement.amount / maxAmount * 180).coerceAtLeast(50.0)
+                    (amountDouble / maxAmount * 180).coerceAtLeast(50.0)
                 } else listOf(180.0, 120.0, 75.0)[index % 3]
 
                 // Aplicamos el factor de reducción SOLO a la altura
@@ -65,8 +69,7 @@ fun ExpenseChart(
 
                 Box(
                     modifier = Modifier
-                        .width(55.dp) // Ancho FIJO, no se reduce
-                         // Solo la altura se reduce
+                        .width(55.dp) // Ancho FIJO
                         .background(
                             color = if (hasData) Color(0xFF2997FD) else Color.Black.copy(alpha = 0.05f),
                             shape = RoundedCornerShape(20.dp)
@@ -78,18 +81,22 @@ fun ExpenseChart(
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Bottom,
-                            modifier = Modifier.padding(4.dp)
+                            modifier = Modifier
+                                .padding(4.dp)
                                 .height(barHeight.dp)
                         ) {
+                            // 3. CORRECCIÓN: Obtener el icono usando la función auxiliar
                             Icon(
-                                painter = painterResource(id = movement.category.icon),
-                                contentDescription = movement.category.name,
+                                painter = painterResource(id = getIconForCategory(movement.category)),
+                                contentDescription = movement.category,
                                 tint = Color.Black,
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.height(3.dp))
+
+                            // 4. CORRECCIÓN: Pasar Double al formateador
                             Text(
-                                text = formatShortAmount(movement.amount),
+                                text = formatShortAmount(amountDouble),
                                 color = Color.White,
                                 fontSize = 10.sp,
                                 textAlign = TextAlign.Center,
@@ -101,7 +108,7 @@ fun ExpenseChart(
             }
         }
 
-        // Mensaje cuando no hay datos, se desvanece con el scroll
+        // Mensaje cuando no hay datos
         if (!hasData && heightFactor > 0.1f) {
             Text(
                 text = "Nuevo mes, añade un movimiento",
@@ -114,7 +121,6 @@ fun ExpenseChart(
     }
 }
 
-
 @Composable
 fun formatShortAmount(amount: Double): String {
     return when {
@@ -125,3 +131,21 @@ fun formatShortAmount(amount: Double): String {
 }
 
 fun Double.format(decimals: Int): String = "%.${decimals}f".format(this)
+
+// 5. NUEVA FUNCIÓN: Mapeo de String (Nombre Categoría) a Recurso Drawable
+// Asegúrate de que estos nombres coincidan con los que guardas en Enter_expense/income
+fun getIconForCategory(categoryName: String): Int {
+    return when (categoryName) {
+        "Transporte", "Transport" -> R.drawable.directions_bus
+        "Hogar", "Home" -> R.drawable.house_2
+        "Personal" -> R.drawable.man_hair_beauty_salon_3
+        "Regalos", "Gifts" -> R.drawable.gift_1
+        "Lujos", "Luxury" -> R.drawable.group
+        "Comida", "Food" -> R.drawable.fast_food_french_1
+        "Membresias", "Membership" -> R.drawable.netflix_1
+        "Vehiculos", "Vehicles" -> R.drawable.bike_1
+        "Trabajo", "Work" -> R.drawable.work_2
+        "Banco", "Bank" -> R.drawable.bank_bitcoin_svgrepo_com
+        else -> R.drawable.house_2 // Icono por defecto si no encuentra coincidencia
+    }
+}

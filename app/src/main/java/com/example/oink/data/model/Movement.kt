@@ -1,14 +1,17 @@
 package com.example.oink.data.model
 
 import androidx.annotation.DrawableRes
+import java.util.Date
 
 data class Movement(
-    val id: Int = 0,
-    val amount:Double,
-    val description:String,
-    val date : String,
-    val category : Subcategory,
-    val type  : MovementType,
+    val id: String = "",
+    val amount: Long = 0,
+    val category: String = "",
+    val date: Date = Date(),
+    val description: String = "",
+    val isRecurring: Boolean = false,
+    val type: String = "",
+    val userId: String = ""
 )
 
 enum class MovementType{

@@ -59,6 +59,7 @@ dependencies {
     implementation("androidx.credentials:credentials:1.5.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation("com.google.firebase:firebase-firestore")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -70,6 +71,8 @@ dependencies {
     implementation("com.airbnb.android:lottie-compose:6.7.1")
     implementation("com.github.tehras:charts:0.2.4-alpha")
     implementation("androidx.compose.foundation:foundation:1.9.4")
+    implementation("org.mindrot:jbcrypt:0.4")
+
 
 
 

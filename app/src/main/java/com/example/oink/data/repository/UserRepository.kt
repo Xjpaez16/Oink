@@ -1,60 +1,132 @@
 package com.example.oink.data.repository
 
 import com.example.oink.data.model.User
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
+import org.mindrot.jbcrypt.BCrypt
+import java.util.Date
 
-class UserRepository {
+class UserRepository(
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+) {
 
-    private val users = mutableListOf<User>()
-    private var loggedUser: User? = null
+    private val users = db.collection("User")
 
-    fun register(user: User): Boolean {
-        if (user.email.isBlank() || user.password.isBlank() || user.name.isBlank()) {
-            return false // No permitir registros incompletos
+    suspend fun registerManual(
+        name: String,
+        email: String,
+        password: String
+    ): User {
+        // Verificar si el email ya existe
+        val existing = getUserByEmail(email)
+        if (existing != null) {
+            throw Exception("El correo ya está registrado.")
         }
-        if (users.any { it.email.equals(user.email, ignoreCase = true) }) {
-            return false // Ya existe un usuario con ese correo
-        }
 
-        users.add(user)
-        loggedUser = user
-        return true
+        // Crear hash de la contraseña
+        val hash = BCrypt.hashpw(password, BCrypt.gensalt())
+
+        // Crear documento
+        val ref = users.document()
+        val user = User(
+            id = ref.id,
+            name = name,
+            email = email,
+            authProvider = "manual",
+            passwordHash = hash,
+            createdAt = Date()
+        )
+
+        ref.set(user).await()
+        return user
     }
 
-    /**
-     * Inicia sesión con email y password.
-     * Retorna true si las credenciales son válidas.
-     */
-    fun login(email: String, password: String): Boolean {
-        val user = users.find {
-            it.email.equals(email, ignoreCase = true) && it.password == password
+
+
+    suspend fun loginManual(email: String, password: String): User {
+        val user = getUserByEmail(email)
+            ?: throw Exception("Usuario no encontrado.")
+
+        if (user.authProvider != "manual") {
+            throw Exception("Este email pertenece a un usuario de Google.")
         }
-        return if (user != null) {
-            loggedUser = user
-            true
-        } else {
-            false
+
+        // Verificar contraseña
+        val isValid = BCrypt.checkpw(password, user.passwordHash)
+
+        if (!isValid) {
+            throw Exception("Contraseña incorrecta.")
         }
+
+        return user
     }
 
-    /**
-     * Devuelve el usuario actualmente logueado (si hay).
-     */
-    fun getLoggedUser(): User? = loggedUser
 
-    /**
-     * Verifica si hay sesión activa.
-     */
-    fun isLoggedIn(): Boolean = loggedUser != null
 
-    /**
-     * Cierra la sesión actual.
-     */
-    fun logout() {
-        loggedUser = null
+    suspend fun loginWithGoogle(
+        googleId: String,
+        name: String,
+        email: String
+    ): User {
+        // Verificar si el usuario ya existe
+        val existing = getUserByEmail(email)
+        if (existing != null) {
+            return existing
+        }
+
+        // Crear usuario nuevo
+        val ref = users.document()
+        val user = User(
+            id = ref.id,
+            name = name,
+            email = email,
+            authProvider = "google",
+            passwordHash = "", // No se usa para login con Google
+            createdAt = Date()
+        )
+
+        ref.set(user).await()
+        return user
     }
 
-    /**
-     * Retorna la lista de usuarios registrados (opcional, solo debug).
-     */
-    fun getAllUsers(): List<User> = users.toList()
+
+
+    suspend fun createUser(user: User): String {
+        users.document(user.id).set(user).await()
+        return user.id
+    }
+
+    suspend fun getUserById(id: String): User? {
+        val doc = users.document(id).get().await()
+        return doc.toObject(User::class.java)
+    }
+
+    suspend fun getUserByEmail(email: String): User? {
+        val query = users
+            .whereEqualTo("email", email)
+            .get()
+            .await()
+
+        return query.documents.firstOrNull()?.toObject(User::class.java)
+    }
+
+    suspend fun updateUser(user: User) {
+        users.document(user.id).set(user).await()
+    }
+
+    suspend fun deleteUser(id: String) {
+        users.document(id).delete().await()
+    }
+
+
+    fun listenUser(id: String) = callbackFlow {
+        val listener = users.document(id)
+            .addSnapshotListener { snapshot, _ ->
+                trySend(snapshot?.toObject(User::class.java))
+            }
+        awaitClose { listener.remove() }
+    }
 }

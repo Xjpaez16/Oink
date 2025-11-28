@@ -5,6 +5,7 @@ import android.app.DatePickerDialog
 import android.graphics.BitmapFactory
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,6 +41,7 @@ import com.example.oink.ui.theme.robotoRegularStyle
 import com.example.oink.viewmodel.AuthViewModel
 import java.util.Calendar
 import androidx.core.graphics.toColorInt
+import com.example.oink.ui.loginApp.GoogleSignInButton
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -203,13 +205,65 @@ fun RegisterScreen(
                                 modifier = Modifier.size(24.dp)
                             )
                         }
+                        GoogleSignInButton(
+                            onClick = {
+
+
+                            },
+                            modifier = Modifier.offset(x = (-10).dp) // Ajusta el offset si es necesario para alinearlo
+                        )
                     }
                 }
             }
         }
     }
 }
+@Composable
+fun GoogleSignInButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .width(308.dp) // Mismo ancho que tus otros botones
+            .height(45.dp), // Altura estándar
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.White,
+            contentColor = Color.Black
+        ),
+        // Borde gris suave típico de Google
+        border = BorderStroke(1.dp, Color(0xFF747775)),
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 0.dp,
+            pressedElevation = 2.dp
+        )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            // Nota: tint = Color.Unspecified es VITAL para ver los colores del logo
+            Icon(
+                painter = painterResource(id = R.drawable.google),
+                contentDescription = "Google Logo",
+                tint = Color.Unspecified,
+                modifier = Modifier.size(20.dp)
+            )
 
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Text(
+                text = stringResource(R.string.btn_google),
+                style = robotoBoldStyle(
+                    fontSize = 16.sp,
+                    color = Color(0xFF1F1F1F) // Gris oscuro oficial de Google
+                )
+            )
+        }
+    }
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerTextField(
