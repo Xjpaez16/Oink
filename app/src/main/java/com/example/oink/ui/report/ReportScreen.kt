@@ -10,17 +10,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.oink.R
 import com.example.oink.ui.components.BottomNavBar
 
 @Composable
-fun FinanceReportScreen(
-    navController: NavController // 1. Agregamos el parámetro necesario
+fun ReportScreen(
+    navController: NavController, // 1. Agregamos el parámetro necesario
+    userName: String
 ) {
     Scaffold(
         bottomBar = { BottomNavBar(navController) },
@@ -34,7 +37,7 @@ fun FinanceReportScreen(
         ) {
 
             Text(
-                text = "Sr Yorch",
+                text = stringResource(R.string.greeting_mr, userName),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF1C60E7)
@@ -43,7 +46,7 @@ fun FinanceReportScreen(
             Spacer(Modifier.height(4.dp))
 
             Text(
-                text = "Aqui podras ver como se ha utilizado tu dinero",
+                text = stringResource(R.string.report_subtitle),
                 fontSize = 12.sp,
                 color = Color.Gray
             )
@@ -51,7 +54,7 @@ fun FinanceReportScreen(
             Spacer(Modifier.height(24.dp))
 
             Text(
-                text = "Informe",
+                text = stringResource(R.string.report_header),
                 fontSize = 38.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF1C60E7)
@@ -66,7 +69,7 @@ fun FinanceReportScreen(
             ) {
 
                 Column {
-                    Text(text = "Desde :", fontSize = 12.sp, color = Color.Gray)
+                    Text(text = stringResource(R.string.label_from), fontSize = 12.sp, color = Color.Gray)
                     Spacer(Modifier.height(6.dp))
 
                     Box(
@@ -82,7 +85,7 @@ fun FinanceReportScreen(
                 }
 
                 Column {
-                    Text(text = "Hasta :", fontSize = 12.sp, color = Color.Gray)
+                    Text(text = stringResource(R.string.label_to), fontSize = 12.sp, color = Color.Gray)
                     Spacer(Modifier.height(6.dp))
 
                     Box(
@@ -108,7 +111,7 @@ fun FinanceReportScreen(
                     .background(Color(0xFFEAF2FF), RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Gráfica aquí", color = Color(0xFF1C60E7))
+                Text(stringResource(R.string.chart_placeholder_text), color = Color(0xFF1C60E7))
             }
 
             Spacer(Modifier.height(40.dp))
@@ -118,7 +121,7 @@ fun FinanceReportScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Gastos totales :", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.report_total_expenses), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                 Text("250.000", fontSize = 16.sp)
             }
 
@@ -128,7 +131,7 @@ fun FinanceReportScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Ingresos totales :", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.report_total_income), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                 Text("500.000", fontSize = 16.sp)
             }
 
@@ -140,7 +143,7 @@ fun FinanceReportScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Gastaste más en:", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.report_spent_most), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Spacer(Modifier.width(6.dp))
@@ -156,7 +159,7 @@ fun FinanceReportScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Generaste más ingresos en:",
+                    stringResource(R.string.report_earned_most),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -175,5 +178,5 @@ fun FinanceReportScreen(
 fun FinanceReportScreenPreview() {
     // Creamos un navController falso para la previsualización
     val navController = rememberNavController()
-    FinanceReportScreen(navController = navController)
+    ReportScreen(navController = navController, userName = "Yorch")
 }

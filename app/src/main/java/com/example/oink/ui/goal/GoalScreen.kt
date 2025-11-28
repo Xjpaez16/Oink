@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.oink.R
 import com.example.oink.ui.components.BottomNavBar
 import com.example.oink.viewmodel.GoalViewModel
 
@@ -53,7 +55,7 @@ fun GoalScreen(
 
             // Encabezado
             Text(
-                text = "Hola Sr $userName",
+                text = stringResource(R.string.greeting_mr, userName),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF1A73E8),
@@ -61,7 +63,7 @@ fun GoalScreen(
             )
 
             Text(
-                text = "Plantemos semillas para crecer",
+                text = stringResource(R.string.goals_subtitle),
                 fontSize = 17.sp,
                 color = Color.Gray,
                 textAlign = TextAlign.Center
@@ -71,7 +73,7 @@ fun GoalScreen(
 
             // Título principal
             Text(
-                text = "Metas",
+                text = stringResource(R.string.goals_title),
                 fontSize = 36.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color(0xFF1A73E8)
@@ -102,7 +104,7 @@ fun GoalScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Cerrar",
+                        contentDescription = stringResource(R.string.desc_close),
                         tint = Color.Gray
                     )
                 }
@@ -114,8 +116,8 @@ fun GoalScreen(
                     OutlinedTextField(
                         value = goalName,
                         onValueChange = { goalName = it },
-                        label = { Text("Nombre") },
-                        placeholder = { Text("Guitarra") },
+                        label = { Text(stringResource(R.string.label_goal_name)) },
+                        placeholder = { Text(stringResource(R.string.placeholder_guitar)) },
                         shape = RoundedCornerShape(50),
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -132,8 +134,8 @@ fun GoalScreen(
                                 goalPrice = it
                             }
                         },
-                        label = { Text("Precio") },
-                        placeholder = { Text("1200000") },
+                        label = { Text(stringResource(R.string.label_goal_price)) },
+                        placeholder = { Text(stringResource(R.string.placeholder_price_large)) },
                         shape = RoundedCornerShape(50),
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), // Teclado numérico
@@ -159,7 +161,7 @@ fun GoalScreen(
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A73E8))
                     ) {
-                        Text("Guardar", color = Color.White)
+                        Text(stringResource(R.string.btn_save), color = Color.White)
                     }
 
                     if (message.isNotEmpty()) {

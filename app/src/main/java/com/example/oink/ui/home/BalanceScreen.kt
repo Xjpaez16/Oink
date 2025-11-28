@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -75,13 +76,13 @@ fun BalanceScreen(
                 logo?.let {
                     Image(
                         bitmap = it,
-                        contentDescription = "Logo Oink",
+                        contentDescription = stringResource(R.string.desc_logo),
                         modifier = Modifier.size(80.dp)
                     )
                 }
                 Icon(
                     painter = painterResource(id = R.drawable.settings),
-                    contentDescription = "Configuración",
+                    contentDescription = stringResource(R.string.desc_settings),
                     tint = Color(0xFF0D3685),
                     modifier = Modifier.size(24.dp)
                 )
@@ -95,14 +96,14 @@ fun BalanceScreen(
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = "Hola Sr $userName",
+                    text = stringResource(R.string.greeting_mr, userName),
                     style = robotoBoldStyle(
                         fontSize = 32.sp,
                         color = Color(0xFF0D3685)
                     ),
                 )
                 Text(
-                    text = "Hecha un vistazo a tus finanzas",
+                    text = stringResource(R.string.balance_subtitle),
                     style = robotoRegularStyle(
                         fontSize = 12.sp,
                         color = Color(0xFF0D3685)
@@ -124,7 +125,7 @@ fun BalanceScreen(
                     border = BorderStroke(2.dp, Color(0xFF2997FD)),
                     shape = RoundedCornerShape(20.dp)
                 ) {
-                    Text("− Gastos")
+                    Text(stringResource(R.string.btn_minus_expenses))
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 OutlinedButton(
@@ -133,7 +134,7 @@ fun BalanceScreen(
                     border = BorderStroke(2.dp, Color(0xFF2997FD)),
                     shape = RoundedCornerShape(20.dp)
                 ) {
-                    Text("+ Ingresos")
+                    Text(stringResource(R.string.btn_plus_income))
                 }
             }
 
@@ -145,7 +146,7 @@ fun BalanceScreen(
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = "Balance",
+                    text = stringResource(R.string.balance_label),
                     style = robotoMediumStyle(
                         fontSize = 24.sp,
                         color = Color.Black

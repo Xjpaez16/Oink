@@ -12,12 +12,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.oink.R
 import com.example.oink.viewmodel.GoalDepositViewModel
 
 @Composable
@@ -40,14 +42,14 @@ fun GoalDepositScreen(
         // Encabezado
         Text(
             modifier = Modifier.padding(top = 50.dp),
-            text = "Sr $userName",
+            text = stringResource(R.string.greeting_mr, userName),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF1A73E8)
         )
 
         Text(
-            text = "Avanza en tu meta tanto como puedas",
+            text = stringResource(R.string.goal_deposit_subtitle),
             fontSize = 17.sp,
             color = Color.Gray,
             textAlign = TextAlign.Center
@@ -81,7 +83,7 @@ fun GoalDepositScreen(
                 .offset(x = 25.dp, y = (-25).dp) ){
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Cerrar",
+                    contentDescription = stringResource(R.string.desc_close),
                     tint = Color.Gray
                 )
             }
@@ -94,8 +96,8 @@ fun GoalDepositScreen(
                 OutlinedTextField(
                     value = amount,
                     onValueChange = { amount = it },
-                    label = { Text("Monto") },
-                    placeholder = { Text("1.200.000") },
+                    label = { Text(stringResource(R.string.label_amount)) },
+                    placeholder = { Text(stringResource(R.string.placeholder_price_formatted)) },
                     shape = RoundedCornerShape(50),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -113,7 +115,7 @@ fun GoalDepositScreen(
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A73E8))
                 ) {
-                    Text("Guardar", color = Color.White)
+                    Text(stringResource(R.string.btn_save), color = Color.White)
                 }
 
                 if (message.isNotEmpty()) {
