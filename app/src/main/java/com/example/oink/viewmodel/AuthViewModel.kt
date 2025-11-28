@@ -17,9 +17,7 @@ class AuthViewModel : ViewModel() {
     val isLoading = mutableStateOf(false)
     val errorMessage = mutableStateOf<String?>(null)
 
-    /**
-     * Registra un nuevo usuario (con animación de carga simulada)
-     */
+
     fun register(name: String, birthDate: String, email: String, password: String) {
         viewModelScope.launch {
             isLoading.value = true

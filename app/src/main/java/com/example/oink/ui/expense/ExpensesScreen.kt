@@ -51,6 +51,7 @@ fun ExpenseScreen(
     type: MovementType, // INCOME o EXPENSE
     viewModel: ExpenseIncomeViewModel = viewModel(),
     onNavigateToIncome: () -> Unit,
+    onNavigateToEnter: () -> Unit,
     navController: NavController
 ) {
     val context = LocalContext.current
@@ -207,7 +208,7 @@ fun ExpenseScreen(
                 horizontalArrangement = Arrangement.Start
             ) {
                 FloatingActionButton(
-                    onClick = {},
+                    onClick = onNavigateToEnter,
                     containerColor = Color(0xFF2997FD),
                     contentColor = Color.White,
                     shape = RoundedCornerShape(100.dp),

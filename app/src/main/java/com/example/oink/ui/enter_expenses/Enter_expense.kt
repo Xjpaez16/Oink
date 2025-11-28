@@ -20,7 +20,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun Enter_expensive_view() {
+fun Enter_expensive_view(
+    onBackClick: () -> Unit = {}
+) {
     var description by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") }
@@ -99,7 +101,7 @@ fun Enter_expensive_view() {
                 modifier = Modifier.padding(start = 30.dp)
             ) {
                 Button(
-                    onClick = {
+                    onClick = { onBackClick()
                         // Cancelar: limpiar todos los campos
                         description = ""
                         amount = ""
@@ -234,8 +236,3 @@ fun CalendarPickerExample(
     }
 }
 
-@Preview
-@Composable
-fun preview() {
-    Enter_expensive_view()
-}

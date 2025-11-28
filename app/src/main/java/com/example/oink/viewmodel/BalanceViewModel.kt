@@ -12,7 +12,7 @@ class BalanceViewModel : ViewModel() {
     private val repository = MovementRepository()
 
     init {
-        // 🔹 Simulación de datos hasta que la vista de agregar esté lista
+        // Simulación de datos hasta que la vista de agregar esté lista
         simulateMovements()
     }
 
