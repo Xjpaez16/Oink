@@ -75,10 +75,10 @@ fun BottomNavBar(
                 tint = Color(0xFF2997FD),
                 modifier = Modifier.size(24.dp)
             ) },
-            selected = currentRoute == NavRoutes.Goal.route,
+            selected = currentRoute == NavRoutes.SelectGoal.route,
             onClick = {
-                if (currentRoute != NavRoutes.Goal.route) {
-                    navController.navigate(NavRoutes.Goal.route) {
+                if (currentRoute != NavRoutes.SelectGoal.route) {
+                    navController.navigate(NavRoutes.SelectGoal.route) {
                         popUpTo(NavRoutes.Home.route) { saveState = true }
                         launchSingleTop = true
                         restoreState = true

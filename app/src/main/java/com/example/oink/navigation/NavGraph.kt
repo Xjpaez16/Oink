@@ -19,6 +19,7 @@ import com.example.oink.ui.income.IncomeScreen
 import com.example.oink.ui.loginApp.LoginScreen
 import com.example.oink.ui.registerApp.RegisterScreen
 import com.example.oink.ui.report.FinanceReportScreen
+import com.example.oink.ui.select_goals.select_goals_view
 import com.example.oink.ui.startAplication.SplashScreen
 import com.example.oink.ui.startAplication.StartUpScreen
 import com.example.oink.viewmodel.AuthViewModel
@@ -137,6 +138,18 @@ fun AppNavGraph(navController : NavHostController ){
             FinanceReportScreen(navController = navController)
 
         }
+        composable(NavRoutes.SelectGoal.route) {
+            val user = authViewModel.getLoggedUser()
+            if (user != null) {
+                select_goals_view(
+                    navController = navController,
+                    userName = user.name,
+                    onNavigateToadd = {navController.navigate(NavRoutes.Goal.route)}
+                )
+            }
+        }
+
+
         composable(NavRoutes.Goal.route) {
             val goalViewModel: GoalViewModel = viewModel()
             val user = authViewModel.getLoggedUser()

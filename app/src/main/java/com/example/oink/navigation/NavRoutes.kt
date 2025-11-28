@@ -13,6 +13,7 @@ sealed class NavRoutes(val route : String){
     object Consult_movs : NavRoutes("consult_movs")
     object  Report : NavRoutes("report")
     object  Goal : NavRoutes("goal")
+    object SelectGoal : NavRoutes("select_goals")
 
 
 
