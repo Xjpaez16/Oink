@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,7 +54,7 @@ fun LoginScreen(
             logo?.let {
                 Image(
                     bitmap = it,
-                    contentDescription = "Logo Oink",
+                    contentDescription = stringResource(R.string.desc_logo),
                     modifier = Modifier
                         .width(230.dp)
                         .height(190.dp)
@@ -69,13 +70,13 @@ fun LoginScreen(
 
             )  {
                 TextFieldWithLabel(
-                    label = "Correo",
+                    label = stringResource(R.string.label_email),
                     value = email,
                     onValueChange = { email = it },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Email,
-                            contentDescription = "Correo",
+                            contentDescription = stringResource(R.string.desc_email),
                             tint = Color.Black
                         )
                     }
@@ -85,13 +86,13 @@ fun LoginScreen(
 
 
                 TextFieldWithLabel(
-                    label = "Contraseña",
+                    label = stringResource(R.string.label_password),
                     value = password,
                     onValueChange = { password = it },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Lock,
-                            contentDescription = "Contraseña",
+                            contentDescription = stringResource(R.string.desc_lock),
                             tint = Color.Black,
 
 
@@ -118,7 +119,7 @@ fun LoginScreen(
 
                     ) {
                         Text(
-                            text = "Iniciar Sesión",
+                            text = stringResource(R.string.btn_login_action),
                             style = robotoBoldStyle(
                                 fontSize = 20.sp,
                                 color = Color.White
@@ -127,7 +128,7 @@ fun LoginScreen(
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             painter = painterResource(id = R.drawable.arrow_right),
-                            contentDescription = "Right arrow",
+                            contentDescription = stringResource(R.string.desc_arrow_right),
                             tint = Color.White,
                             modifier = Modifier.size(24.dp)
                         )
@@ -143,7 +144,7 @@ fun LoginScreen(
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.corner_down_left),
-                            contentDescription = "Right arrow",
+                            contentDescription = stringResource(R.string.desc_arrow_right),
                             tint = Color.White,
                             modifier = Modifier.size(24.dp)
                         )

@@ -19,10 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.oink.R
 import com.example.oink.ui.theme.robotoBoldStyle
 import com.example.oink.ui.theme.robotoSemiBoldStyle
 
@@ -62,7 +64,7 @@ fun StartUpScreen(
                 translateIcon?.let {
                     Image(
                         bitmap = it,
-                        contentDescription = "Traducir idioma",
+                        contentDescription = stringResource(R.string.desc_translate),
                         modifier = Modifier
                             .size(28.dp)
                             .clickable { onLanguageClick() }
@@ -73,7 +75,7 @@ fun StartUpScreen(
             logo?.let {
                 Image(
                     bitmap = it,
-                    contentDescription = "Logo Oink",
+                    contentDescription = stringResource(R.string.desc_logo),
                     modifier = Modifier
                         .width(120.dp)
                         .height(70.dp)
@@ -85,7 +87,7 @@ fun StartUpScreen(
             centralImage?.let {
                 Image(
                     bitmap = it,
-                    contentDescription = "Imagen principal",
+                    contentDescription = stringResource(R.string.desc_main_image),
                     modifier = Modifier
                         .width(297.dp)
                         .height(233.dp)
@@ -95,7 +97,7 @@ fun StartUpScreen(
 
 
             Text(
-                text = "Tu mejor compañía financiera",
+                text = stringResource(R.string.slogan),
                 style = robotoSemiBoldStyle(
                     fontSize = 32.sp,
                     color = Color(0xFF0D3685)
@@ -123,7 +125,7 @@ fun StartUpScreen(
                         .offset(y=(-30).dp)
                 ) {
                     Text(
-                        text = "Registrarse",
+                        text = stringResource(R.string.btn_register_me),
                         style = robotoBoldStyle(
                             fontSize = 20.sp,
                             color = Color(0xFFFFFFFF)
@@ -146,7 +148,7 @@ fun StartUpScreen(
                         .offset(y=(-30).dp)
                 ) {
                     Text(
-                        text = "Ya tengo una cuenta",
+                        text = stringResource(R.string.btn_have_account),
                         style = robotoBoldStyle(
                             fontSize = 20.sp,
                             color = Color(0xFF2997FD)

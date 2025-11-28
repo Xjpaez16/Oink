@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState // IMPORTANTE
@@ -29,7 +30,7 @@ fun BottomNavBar(
         NavigationBarItem(
             icon = { Icon(
                 painter = painterResource(id = R.drawable.home_smile_svgrepo_com_3),
-                contentDescription = "Inicio",
+                contentDescription = stringResource(R.string.nav_home),
                 tint = Color(0xFF2997FD),
                 modifier = Modifier.size(24.dp)
             ) },
@@ -45,13 +46,13 @@ fun BottomNavBar(
                     }
                 }
             },
-            label = { Text("Inicio") }
+            label = { Text(stringResource(R.string.nav_home)) }
         )
 
         NavigationBarItem(
             icon = { Icon(
                 painter = painterResource(id = R.drawable.reports_svgrepo_com__1__4),
-                contentDescription = "Reportes",
+                contentDescription = stringResource(R.string.nav_reports),
                 tint = Color(0xFF2997FD),
                 modifier = Modifier.size(24.dp)
             ) },
@@ -65,13 +66,13 @@ fun BottomNavBar(
                     }
                 }
             },
-            label = { Text("Reportes") },
+            label = { Text(stringResource(R.string.nav_reports)) },
         )
 
         NavigationBarItem(
             icon = { Icon(
                 painter = painterResource(id = R.drawable.trophy_prize_medal_svgrepo_com_3),
-                contentDescription = "Logros",
+                contentDescription = stringResource(R.string.nav_goals),
                 tint = Color(0xFF2997FD),
                 modifier = Modifier.size(24.dp)
             ) },
@@ -85,13 +86,13 @@ fun BottomNavBar(
                     }
                 }
             },
-            label = { Text("Logros") }
+            label = { Text(stringResource(R.string.nav_goals)) }
         )
 
         NavigationBarItem(
             icon = { Icon(
                 painter = painterResource(id = R.drawable.today),
-                contentDescription = "Calendario",
+                contentDescription = stringResource(R.string.nav_calendar),
                 tint = Color(0xFF2997FD),
                 modifier = Modifier.size(24.dp)
             ) },
@@ -106,7 +107,7 @@ fun BottomNavBar(
                     }
                 }
             },
-            label = { Text("Calendario") }
+            label = { Text(stringResource(R.string.nav_calendar)) }
         )
     }
 }

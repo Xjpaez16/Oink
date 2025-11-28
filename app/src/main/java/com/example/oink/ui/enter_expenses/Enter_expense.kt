@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -20,13 +21,14 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun Enter_expensive_view(
+fun Enter_expense_view(
     onBackClick: () -> Unit = {}
 ) {
     var description by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") }
     var categoriaSeleccionada by remember { mutableStateOf<Pair<String, Int>?>(null) }
+    val noneCategory = stringResource(R.string.category_none)
 
     Box(
         modifier = Modifier
@@ -38,7 +40,7 @@ fun Enter_expensive_view(
 
             // Título
             Text(
-                text = "Gastos",
+                text = stringResource(R.string.title_expenses_entry),
                 color = Color(0xFF2997FD),
                 fontSize = 70.sp,
                 fontWeight = FontWeight.Bold,
@@ -51,7 +53,7 @@ fun Enter_expensive_view(
             TextField(
                 value = description,
                 onValueChange = { description = it },
-                placeholder = { Text("Descripción", color = Color.LightGray, fontSize = 40.sp, fontWeight = FontWeight.Bold) },
+                placeholder = { Text(stringResource(R.string.hint_description), color = Color.LightGray, fontSize = 40.sp, fontWeight = FontWeight.Bold) },
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
@@ -68,7 +70,7 @@ fun Enter_expensive_view(
             TextField(
                 value = amount,
                 onValueChange = { amount = it },
-                placeholder = { Text("Monto", color = Color.LightGray, fontSize = 40.sp, fontWeight = FontWeight.Bold) },
+                placeholder = { Text(stringResource(R.string.hint_amount), color = Color.LightGray, fontSize = 40.sp, fontWeight = FontWeight.Bold) },
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
@@ -110,7 +112,7 @@ fun Enter_expensive_view(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
                 ) {
-                    Text("Cancelar", color = Color.White)
+                    Text(stringResource(R.string.btn_cancel), color = Color.White)
                 }
 
                 Button(
@@ -119,11 +121,11 @@ fun Enter_expensive_view(
                         println("Descripción: $description")
                         println("Monto: $amount")
                         println("Fecha: $selectedDate")
-                        println("Categoría: ${categoriaSeleccionada?.first ?: "Ninguna"}")
+                        println("Categoría: ${categoriaSeleccionada?.first ?: noneCategory}")
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2997FD))
                 ) {
-                    Text("Guardar", color = Color.White)
+                    Text(stringResource(R.string.btn_save), color = Color.White)
                 }
             }
         }
@@ -136,14 +138,14 @@ fun ListaCategorias(
     onCategoriaSelected: (Pair<String, Int>) -> Unit
 ) {
     val categorias: List<Pair<String, Int>> = listOf(
-        "Transporte" to R.drawable.directions_bus,
-        "Hogar" to R.drawable.house_2,
-        "Personal" to R.drawable.man_hair_beauty_salon_3,
-        "Regalos" to R.drawable.gift_1,
-        "Lujos" to R.drawable.group,
-        "Comida" to R.drawable.fast_food_french_1,
-        "Membresias" to R.drawable.netflix_1,
-        "Vehiculos" to R.drawable.bike_1
+        stringResource(R.string.cat_transport) to R.drawable.directions_bus,
+        stringResource(R.string.cat_home) to R.drawable.house_2,
+        stringResource(R.string.cat_personal) to R.drawable.man_hair_beauty_salon_3,
+        stringResource(R.string.cat_gifts) to R.drawable.gift_1,
+        stringResource(R.string.cat_luxury) to R.drawable.group,
+        stringResource(R.string.cat_food) to R.drawable.fast_food_french_1,
+        stringResource(R.string.cat_membership) to R.drawable.netflix_1,
+        stringResource(R.string.cat_vehicles) to R.drawable.bike_1
     )
 
     FlowRow(
@@ -182,7 +184,7 @@ fun ListaCategorias(
 
     selectedCategoria?.let {
         Text(
-            text = "Seleccionaste: ${it.first}",
+            text = stringResource(R.string.category_selected_format, it.first),
             color = Color.Gray,
             modifier = Modifier.padding(start = 16.dp, top = 8.dp)
         )
@@ -209,12 +211,12 @@ fun CalendarPickerExample(
                     }
                     showDialog = false
                 }) {
-                    Text("OK")
+                    Text(stringResource(R.string.btn_ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.btn_cancel))
                 }
             }
         ) {
@@ -230,9 +232,14 @@ fun CalendarPickerExample(
             .height(60.dp)
     ) {
         Text(
-            if (selectedDate.isEmpty()) "\uD83D\uDCC5" else "Fecha: $selectedDate",
+            if (selectedDate.isEmpty()) stringResource(R.string.date_button_placeholder) else stringResource(R.string.date_button_format, selectedDate),
             fontSize = if (selectedDate.isEmpty()) 30.sp else 14.sp
         )
     }
 }
 
+@Preview
+@Composable
+fun PreviewEnterExpense() {
+    Enter_expense_view()
+}

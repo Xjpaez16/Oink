@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.oink.R
 import com.example.oink.ui.components.BottomNavBar
 
 @Composable
@@ -38,7 +40,7 @@ fun select_goals_view(
                 containerColor = Color(0xFF2997FD),
                 contentColor = Color.White
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Agregar meta")
+                Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(R.string.desc_add_goal))
             }
         },
         containerColor = Color(0xFFF8FAFF)
@@ -57,7 +59,7 @@ fun select_goals_view(
             item {
                 Spacer(modifier = Modifier.height(40.dp))
                 Text(
-                    text = "Hola Sr $userName",
+                    text = stringResource(R.string.greeting_mr, userName),
                     color = Color(0xFF2997FD),
                     fontSize = 40.sp, // Ajustado para que quepa mejor
                     fontWeight = FontWeight.Bold,
@@ -65,7 +67,7 @@ fun select_goals_view(
                     lineHeight = 48.sp
                 )
                 Text(
-                    text = "Plantemos semillas para crecer",
+                    text = stringResource(R.string.goals_subtitle),
                     color = Color(0xFF2997FD),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -77,7 +79,7 @@ fun select_goals_view(
             // Item 2: Título de sección
             item {
                 Text(
-                    text = "Metas",
+                    text = stringResource(R.string.goals_title),
                     color = Color(0xFF2997FD),
                     fontSize = 48.sp, // Ajustado
                     fontWeight = FontWeight.ExtraBold,
@@ -145,7 +147,7 @@ fun ObjetivoCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "$${"%,.0f".format(actual)} de $${"%,.0f".format(meta)}",
+                text = stringResource(R.string.goal_progress_format, "$${String.format("%,.0f", actual)}", "$${String.format("%,.0f", meta)}"),
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
                 color = Color.Gray,

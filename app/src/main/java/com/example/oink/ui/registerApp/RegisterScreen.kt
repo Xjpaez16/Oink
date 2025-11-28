@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -62,9 +63,9 @@ fun RegisterScreen(
     var nombre by remember {mutableStateOf("")}
 
     if (isLoading) {
-        LoadingScreen(animationRes = R.raw.pig_money, message = "Creando tu cuenta...")
+        LoadingScreen(animationRes = R.raw.pig_money, message = stringResource(R.string.msg_creating_account))
     } else if (isLoggedIn) {
-        LoadingScreen(animationRes = R.raw.pig_money, message = "¡Registro exitoso! Bienvenido a Oink...")
+        LoadingScreen(animationRes = R.raw.pig_money, message = stringResource(R.string.msg_register_success))
     }else {
         Box(
             modifier = Modifier
@@ -82,7 +83,7 @@ fun RegisterScreen(
                 logo?.let {
                     Image(
                         bitmap = it,
-                        contentDescription = "Logo Oink",
+                        contentDescription = stringResource(R.string.desc_logo),
                         modifier = Modifier
                             .width(230.dp)
                             .height(190.dp)
@@ -98,13 +99,13 @@ fun RegisterScreen(
 
                 ) {
                     TextFieldWithLabel(
-                        label = "Nombre",
+                        label = stringResource(R.string.label_name),
                         value = nombre,
                         onValueChange = { nombre = it },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.AccountCircle,
-                                contentDescription = "nombre",
+                                contentDescription = stringResource(R.string.label_name),
                                 tint = Color.Black,
 
 
@@ -114,13 +115,13 @@ fun RegisterScreen(
                     )
 
                     DatePickerTextField(
-                        label = "Fecha de nacimiento",
+                        label = stringResource(R.string.label_birthdate),
                         value = f_nacimiento,
                         onValueChange = { f_nacimiento = it },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.DateRange,
-                                contentDescription = "fecha de nacimiento",
+                                contentDescription = stringResource(R.string.label_birthdate),
                                 tint = Color.Black,
 
 
@@ -129,26 +130,26 @@ fun RegisterScreen(
                     )
 
                     TextFieldWithLabel(
-                        label = "Correo",
+                        label = stringResource(R.string.label_email),
                         value = email,
                         onValueChange = { email = it },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Email,
-                                contentDescription = "Correo",
+                                contentDescription = stringResource(R.string.desc_email),
                                 tint = Color.Black
                             )
                         }
                     )
 
                     TextFieldWithLabel(
-                        label = "Contraseña",
+                        label = stringResource(R.string.label_password),
                         value = password,
                         onValueChange = { password = it },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Lock,
-                                contentDescription = "Contraseña",
+                                contentDescription = stringResource(R.string.desc_lock),
                                 tint = Color.Black,
 
 
@@ -172,7 +173,7 @@ fun RegisterScreen(
 
                         ) {
                             Text(
-                                text = "Registrarse",
+                                text = stringResource(R.string.btn_register_action),
                                 style = robotoBoldStyle(
                                     fontSize = 20.sp,
                                     color = Color.White
@@ -181,7 +182,7 @@ fun RegisterScreen(
                             Spacer(modifier = Modifier.width(4.dp))
                             Icon(
                                 painter = painterResource(id = R.drawable.arrow_right),
-                                contentDescription = "Right arrow",
+                                contentDescription = stringResource(R.string.desc_arrow_right),
                                 tint = Color.White,
                                 modifier = Modifier.size(24.dp)
                             )
@@ -197,7 +198,7 @@ fun RegisterScreen(
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.corner_down_left),
-                                contentDescription = "Right arrow",
+                                contentDescription = stringResource(R.string.desc_arrow_right),
                                 tint = Color.White,
                                 modifier = Modifier.size(24.dp)
                             )

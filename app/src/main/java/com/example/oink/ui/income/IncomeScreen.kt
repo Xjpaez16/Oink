@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -101,13 +102,13 @@ fun IncomeScreen(
                     logo?.let {
                         Image(
                             bitmap = it,
-                            contentDescription = "Logo Oink",
+                            contentDescription = stringResource(R.string.desc_logo),
                             modifier = Modifier.size(80.dp)
                         )
                     }
                     Icon(
                         painter = painterResource(id = R.drawable.settings),
-                        contentDescription = "Configuración",
+                        contentDescription = stringResource(R.string.desc_settings),
                         tint = Color(0xFF0D3685),
                         modifier = Modifier.size(24.dp)
                     )
@@ -129,7 +130,7 @@ fun IncomeScreen(
 
                         shape = RoundedCornerShape(20.dp)
                     ) {
-                        Text("− Gastos")
+                        Text(stringResource(R.string.btn_minus_expenses))
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     OutlinedButton(
@@ -141,7 +142,7 @@ fun IncomeScreen(
                         border = BorderStroke(2.dp, Color.White),
                         shape = RoundedCornerShape(20.dp)
                     ) {
-                        Text("+ Ingresos")
+                        Text(stringResource(R.string.btn_plus_income))
                     }
                 }
 
@@ -153,7 +154,7 @@ fun IncomeScreen(
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = "Total de ingresos",
+                        text = stringResource(R.string.total_income_label),
                         style = robotoMediumStyle(
                             fontSize = 24.sp,
                             color = Color.Black
@@ -219,7 +220,7 @@ fun IncomeScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Agregar",
+                        contentDescription = stringResource(R.string.desc_add),
                         tint = Color.White
                     )
                 }

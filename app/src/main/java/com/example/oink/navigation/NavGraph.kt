@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import com.example.oink.data.model.MovementType
 import com.example.oink.data.model.User
 import com.example.oink.ui.consult_movs.Consult_movs_view
-import com.example.oink.ui.enter_expenses.Enter_expensive_view
+import com.example.oink.ui.enter_expenses.Enter_expense_view
 import com.example.oink.ui.enter_money.Enter_money_view
 import com.example.oink.ui.expense.ExpenseScreen
 import com.example.oink.ui.goal.GoalScreen
@@ -18,7 +18,7 @@ import com.example.oink.ui.home.BalanceScreen
 import com.example.oink.ui.income.IncomeScreen
 import com.example.oink.ui.loginApp.LoginScreen
 import com.example.oink.ui.registerApp.RegisterScreen
-import com.example.oink.ui.report.FinanceReportScreen
+import com.example.oink.ui.report.ReportScreen
 import com.example.oink.ui.select_goals.select_goals_view
 import com.example.oink.ui.startAplication.SplashScreen
 import com.example.oink.ui.startAplication.StartUpScreen
@@ -119,7 +119,7 @@ fun AppNavGraph(navController : NavHostController ){
             )
         }
         composable(NavRoutes.insert_expenses.route) {
-            Enter_expensive_view(
+            Enter_expense_view(
                 onBackClick = {
                     navController.popBackStack()
                 }
@@ -135,8 +135,10 @@ fun AppNavGraph(navController : NavHostController ){
 
         }
         composable(NavRoutes.Report.route) {
-            FinanceReportScreen(navController = navController)
-
+            val user = authViewModel.getLoggedUser()
+            if (user != null) {
+                ReportScreen(navController = navController, userName = user.name)
+            }
         }
         composable(NavRoutes.SelectGoal.route) {
             val user = authViewModel.getLoggedUser()
