@@ -41,8 +41,8 @@ fun BalanceScreen(
     onNavigateToExpenses: () -> Unit,
     navController: NavController
 ) {
-    val movements = remember { viewModel.getAllMovements() }
-    val balance = remember { viewModel.getTotalBalance() }
+    val movements = viewModel.movements
+    val balance = viewModel.totalBalance
     val context = LocalContext.current
 
 

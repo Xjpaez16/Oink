@@ -2,7 +2,6 @@ package com.example.oink.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -18,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.oink.R
 import com.example.oink.data.model.Movement
+import com.example.oink.data.model.MovementType // Importamos el Enum
 import com.example.oink.viewmodel.ExpenseIncomeViewModel
 
 @Composable
@@ -28,55 +28,56 @@ fun ExpenseChart(
     val movements = viewModel.movements
     val hasData = movements.isNotEmpty()
 
-    // Factor para reducir solo la ALTURA de las barras
-    // Se reduce gradualmente hasta desaparecer cuando scrollOffset >= 800
+    // Factor visual: reduce la altura de las barras al hacer scroll
     val heightFactor = (1f - (scrollOffset / 800f)).coerceIn(0f, 1f)
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(260.dp), // Altura fija del contenedor
+            .height(260.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 0.dp)
                 .height(260.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.Bottom
         ) {
-            // 1. CORRECCIÓN: Constructor actualizado de Movement para datos vacíos
+            // 1. CORRECCIÓN: Usamos el Enum MovementType.NONE.name para rellenar el String
             val bars = if (hasData) movements else List(4) {
-                Movement(id = "dummy", amount = 0, category = "", type = "NONE")
+                Movement(
+                    id = "dummy",
+                    amount = 0,
+                    category = "",
+                    type = MovementType.NONE.name // Usamos el nombre del Enum ("NONE")
+                )
             }
 
-            // 2. CORRECCIÓN: Convertir Long a Double para cálculos matemáticos
+            // 2. CORRECCIÓN: Convertimos Long a Double para la matemática de la gráfica
             val maxAmount = (movements.maxOfOrNull { it.amount } ?: 1).toDouble()
 
             bars.forEachIndexed { index, movement ->
 
-                // Convertimos el monto a Double para usarlo en la UI
                 val amountDouble = movement.amount.toDouble()
 
-                // Calculamos la altura base de la barra
+                // Calculamos altura relativa
                 val baseHeight = if (hasData) {
                     (amountDouble / maxAmount * 180).coerceAtLeast(50.0)
-                } else listOf(180.0, 120.0, 75.0)[index % 3]
+                } else listOf(180.0, 120.0, 75.0)[index % 3] // Alturas falsas para diseño vacío
 
-                // Aplicamos el factor de reducción SOLO a la altura
                 val barHeight = baseHeight * heightFactor
 
                 Box(
                     modifier = Modifier
-                        .width(55.dp) // Ancho FIJO
+                        .width(55.dp)
                         .background(
                             color = if (hasData) Color(0xFF2997FD) else Color.Black.copy(alpha = 0.05f),
                             shape = RoundedCornerShape(20.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Solo mostramos el contenido si la barra tiene suficiente altura
+                    // Solo mostramos contenido si la barra es visible
                     if (hasData && heightFactor > 0.3f) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -85,7 +86,7 @@ fun ExpenseChart(
                                 .padding(4.dp)
                                 .height(barHeight.dp)
                         ) {
-                            // 3. CORRECCIÓN: Obtener el icono usando la función auxiliar
+                            // 3. CORRECCIÓN: Función auxiliar para obtener el icono desde el String de categoría
                             Icon(
                                 painter = painterResource(id = getIconForCategory(movement.category)),
                                 contentDescription = movement.category,
@@ -94,7 +95,6 @@ fun ExpenseChart(
                             )
                             Spacer(modifier = Modifier.height(3.dp))
 
-                            // 4. CORRECCIÓN: Pasar Double al formateador
                             Text(
                                 text = formatShortAmount(amountDouble),
                                 color = Color.White,
@@ -121,6 +121,7 @@ fun ExpenseChart(
     }
 }
 
+// Función para formatear números grandes (1k, 1M)
 @Composable
 fun formatShortAmount(amount: Double): String {
     return when {
@@ -132,10 +133,11 @@ fun formatShortAmount(amount: Double): String {
 
 fun Double.format(decimals: Int): String = "%.${decimals}f".format(this)
 
-// 5. NUEVA FUNCIÓN: Mapeo de String (Nombre Categoría) a Recurso Drawable
-// Asegúrate de que estos nombres coincidan con los que guardas en Enter_expense/income
+// 4. NUEVA FUNCIÓN IMPORTANTE:
+// Como en tu modelo 'category' es String, necesitamos esto para saber qué icono pintar.
 fun getIconForCategory(categoryName: String): Int {
     return when (categoryName) {
+        // Nombres usados en Enter_expense.kt y Enter_money.kt
         "Transporte", "Transport" -> R.drawable.directions_bus
         "Hogar", "Home" -> R.drawable.house_2
         "Personal" -> R.drawable.man_hair_beauty_salon_3
@@ -146,6 +148,7 @@ fun getIconForCategory(categoryName: String): Int {
         "Vehiculos", "Vehicles" -> R.drawable.bike_1
         "Trabajo", "Work" -> R.drawable.work_2
         "Banco", "Bank" -> R.drawable.bank_bitcoin_svgrepo_com
-        else -> R.drawable.house_2 // Icono por defecto si no encuentra coincidencia
+        // Icono por defecto si no coincide ninguno
+        else -> R.drawable.house_2
     }
 }

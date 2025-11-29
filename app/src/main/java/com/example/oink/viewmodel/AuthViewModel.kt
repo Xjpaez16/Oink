@@ -17,63 +17,114 @@ class AuthViewModel : ViewModel() {
     val isLoading = mutableStateOf(false)
     val errorMessage = mutableStateOf<String?>(null)
 
+    // Usuario actual en memoria tras loguearse
+    val currentUser = mutableStateOf<User?>(null)
 
+    // ------------------------------------------------------
+    // REGISTRO MANUAL
+    // ------------------------------------------------------
     fun register(name: String, birthDate: String, email: String, password: String) {
         viewModelScope.launch {
+            if (name.isBlank() || email.isBlank() || password.isBlank()) {
+                errorMessage.value = "Por favor llena todos los campos obligatorios."
+                return@launch
+            }
+
             isLoading.value = true
             errorMessage.value = null
 
-            // Simulamos una pequeña espera (por ejemplo 1.5 segundos)
-            delay(1500)
+            try {
+                // Simulamos un pequeño delay visual
+                delay(1000)
 
-            val user = User(name, birthDate, email, password)
-            delay(1500)
-            val success = userRepository.register(user)
+                // Nota: birthDate se recibe de la UI pero no se guarda en Firestore
+                // porque el modelo User actual no tiene ese campo.
+                val user = userRepository.registerManual(name, email, password)
 
-            if (success) {
-
+                currentUser.value = user
                 isLoggedIn.value = true
-            } else {
-                errorMessage.value = "El correo ya está registrado o hay campos vacíos."
-            }
 
-            isLoading.value = false
+            } catch (e: Exception) {
+                errorMessage.value = e.message ?: "Error al registrarse"
+                isLoggedIn.value = false
+            } finally {
+                isLoading.value = false
+            }
         }
     }
 
-    /**
-     * Inicia sesión con email y password (con animación de carga simulada)
-     */
+    // ------------------------------------------------------
+    // LOGIN MANUAL
+    // ------------------------------------------------------
     fun login(email: String, password: String) {
+        viewModelScope.launch {
+            if (email.isBlank() || password.isBlank()) {
+                errorMessage.value = "Ingresa correo y contraseña."
+                return@launch
+            }
+
+            isLoading.value = true
+            errorMessage.value = null
+
+            try {
+                delay(1000)
+
+                val user = userRepository.loginManual(email, password)
+
+                currentUser.value = user
+                isLoggedIn.value = true
+
+            } catch (e: Exception) {
+                errorMessage.value = e.message ?: "Error de inicio de sesión"
+                isLoggedIn.value = false
+            } finally {
+                isLoading.value = false
+            }
+        }
+    }
+
+    // ------------------------------------------------------
+    // GOOGLE (LOGIN Y REGISTRO)
+    // ------------------------------------------------------
+
+    // Esta función maneja tanto el LOGIN como el REGISTRO con Google.
+    // El repositorio decide: si el email existe, loguea; si no, crea el usuario.
+    fun handleGoogleLogin(googleId: String, name: String, email: String) {
         viewModelScope.launch {
             isLoading.value = true
             errorMessage.value = null
 
-            // Simulamos un pequeño delay de carga (por ejemplo 1 segundo)
-            delay(1000)
+            try {
+                // Llamamos al repositorio
+                val user = userRepository.loginWithGoogle(googleId, name, email)
 
-            val success = userRepository.login(email, password)
-
-            if (success) {
+                currentUser.value = user
                 isLoggedIn.value = true
-            } else {
-                errorMessage.value = "Credenciales incorrectas."
-            }
 
-            isLoading.value = false
+            } catch (e: Exception) {
+                errorMessage.value = "Error al conectar con Google: ${e.message}"
+                isLoggedIn.value = false
+            } finally {
+                isLoading.value = false
+            }
         }
     }
 
-    /**
-     * Devuelve el usuario actualmente logueado.
-     */
-    fun getLoggedUser(): User? = userRepository.getLoggedUser()
+    // Alias para llamar desde la pantalla de Registro (hace lo mismo que login)
+    fun registerWithGoogle(googleId: String, name: String, email: String) {
+        handleGoogleLogin(googleId, name, email)
+    }
 
-    /**
-     * Cierra sesión.
-     */
+    // ------------------------------------------------------
+    // UTILS
+    // ------------------------------------------------------
+    fun getLoggedUser(): User? {
+        return currentUser.value
+    }
+
     fun logout() {
-        userRepository.logout()
+        currentUser.value = null
         isLoggedIn.value = false
+        errorMessage.value = null
     }
 }
