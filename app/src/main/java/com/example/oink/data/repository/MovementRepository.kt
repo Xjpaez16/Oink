@@ -10,7 +10,7 @@ import kotlinx.coroutines.tasks.await
 class MovementRepository(
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) {
-    private val movements = db.collection("Movements")
+    private val movements = db.collection("movements")
 
     // --- Funciones Básicas CRUD ---
 

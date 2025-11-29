@@ -4,12 +4,11 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,23 +16,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.oink.R
 import com.example.oink.ui.components.BottomNavBar
+import com.example.oink.viewmodel.AuthViewModel
+import com.example.oink.viewmodel.GoalViewModel
 
 @Composable
 fun select_goals_view(
     navController: NavController,
+    authViewModel: AuthViewModel, // 1. Inyectamos AuthViewModel
+    // goalViewModel: GoalViewModel = viewModel(), // Descomentar cuando implementes loadGoals()
     userName: String = "Yorch" ,
-    onNavigateToadd: () -> Unit,// Parámetro opcional para el nombre
+    onNavigateToadd: () -> Unit,
 ) {
+    // val currentUser = authViewModel.currentUser.value
+    // LaunchedEffect(Unit) {
+    //    currentUser?.id?.let { goalViewModel.loadGoals(it) }
+    // }
+    // val goals = goalViewModel.goalsList // Suponiendo que tengas esta lista
+
     Scaffold(
         bottomBar = { BottomNavBar(navController) },
-        // Movemos el botón flotante aquí para que sea fijo y nativo
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavigateToadd,
@@ -46,22 +53,20 @@ fun select_goals_view(
         containerColor = Color(0xFFF8FAFF)
     ) { innerPadding ->
 
-        // Usamos LazyColumn para permitir SCROLL si hay muchas metas
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding) // <--- CORRECCIÓN VITAL: Aplicamos el padding del Scaffold
-                .padding(horizontal = 20.dp), // Padding lateral unificado
+                .padding(innerPadding)
+                .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // Item 1: Encabezado y Saludo
             item {
                 Spacer(modifier = Modifier.height(40.dp))
                 Text(
                     text = stringResource(R.string.greeting_mr, userName),
                     color = Color(0xFF2997FD),
-                    fontSize = 40.sp, // Ajustado para que quepa mejor
+                    fontSize = 40.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     lineHeight = 48.sp
@@ -76,12 +81,11 @@ fun select_goals_view(
                 Spacer(modifier = Modifier.height(40.dp))
             }
 
-            // Item 2: Título de sección
             item {
                 Text(
                     text = stringResource(R.string.goals_title),
                     color = Color(0xFF2997FD),
-                    fontSize = 48.sp, // Ajustado
+                    fontSize = 48.sp,
                     fontWeight = FontWeight.ExtraBold,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -90,12 +94,13 @@ fun select_goals_view(
                 )
             }
 
-            // Item 3: Lista de tarjetas (Aquí irían tus datos dinámicos)
+            // AQUÍ LISTARÍAS TUS METAS REALES
+            // items(goals) { goal -> ObjetivoCard(goal.name, goal.amountSaved.toDouble(), goal.amountTarget.toDouble()) }
+
             item {
                 ObjetivoCard("Guitarra", 800000.0, 1200000.0)
                 ObjetivoCard("Moto", 1800000.0, 12000000.0)
-                // Puedes agregar más para probar el scroll
-                Spacer(modifier = Modifier.height(80.dp)) // Espacio final para que el FAB no tape el último item
+                Spacer(modifier = Modifier.height(80.dp))
             }
         }
     }
@@ -110,10 +115,12 @@ fun ObjetivoCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp), // Espacio entre tarjetas
+            .padding(vertical = 8.dp),
         border = BorderStroke(1.dp, Color(0xFF2997FD)),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        // TODO: Agregar onClick para navegar a GoalDepositScreen con el nombre de esta meta
+        // onClick = { navController.navigate("deposit_screen/$titulo") }
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -127,7 +134,6 @@ fun ObjetivoCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Barra de progreso
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -137,7 +143,7 @@ fun ObjetivoCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(fraction = (actual / meta).coerceIn(0.0, 1.0).toFloat()) // Evita crash si supera el 100%
+                        .fillMaxWidth(fraction = (actual / meta).coerceIn(0.0, 1.0).toFloat())
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(8.dp))
                         .background(Color(0xFF2997FD))
@@ -156,5 +162,3 @@ fun ObjetivoCard(
         }
     }
 }
-
-

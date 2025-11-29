@@ -25,35 +25,47 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.oink.R
 import com.example.oink.ui.components.BottomNavBar
+import com.example.oink.ui.components.LoadingScreen
+import com.example.oink.viewmodel.AuthViewModel
 import com.example.oink.viewmodel.GoalViewModel
 
 @Composable
 fun GoalScreen(
     userName: String,
+    authViewModel: AuthViewModel, // 1. Inyectamos AuthViewModel
     viewModel: GoalViewModel = viewModel(),
     onClose: () -> Unit = {},
     navController: NavController
 ) {
     var goalName by remember { mutableStateOf("") }
     var goalPrice by remember { mutableStateOf("") }
-    var message by remember { mutableStateOf("") }
+
+    // 2. Observamos los estados del ViewModel
+    val message by viewModel.messageState
+    val isLoading by viewModel.isLoading
+    val currentUser = authViewModel.currentUser.value // Obtenemos el usuario
+
+    // Si está cargando, mostramos loader
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = Color(0xFF1A73E8))
+        }
+    }
 
     Scaffold(
         bottomBar = { BottomNavBar(navController) },
-        containerColor = Color(0xFFF8FAFF) // Color de fondo global mejorado
+        containerColor = Color(0xFFF8FAFF)
     ) { innerPadding ->
-        // Usamos innerPadding aquí para respetar el espacio de la barra inferior
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding) // <-- VITAL: Evita que la navbar tape el contenido
-                .padding(horizontal = 24.dp), // Padding lateral
+                .padding(innerPadding)
+                .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Encabezado
             Text(
                 text = stringResource(R.string.greeting_mr, userName),
                 fontSize = 24.sp,
@@ -71,7 +83,6 @@ fun GoalScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Título principal
             Text(
                 text = stringResource(R.string.goals_title),
                 fontSize = 36.sp,
@@ -81,7 +92,6 @@ fun GoalScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Contenedor del formulario
             Box(
                 modifier = Modifier
                     .border(
@@ -94,12 +104,10 @@ fun GoalScreen(
                     .background(Color.White)
                     .padding(24.dp)
             ) {
-                // Botón de cerrar
                 IconButton(
                     onClick = onClose,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        // Ajuste fino para que no se salga del borde visualmente
                         .offset(x = 12.dp, y = (-12).dp)
                 ) {
                     Icon(
@@ -110,9 +118,8 @@ fun GoalScreen(
                 }
 
                 Column {
-                    Spacer(modifier = Modifier.height(16.dp)) // Espacio para no chocar con la X
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    // Campo Nombre
                     OutlinedTextField(
                         value = goalName,
                         onValueChange = { goalName = it },
@@ -125,11 +132,9 @@ fun GoalScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Campo Precio
                     OutlinedTextField(
                         value = goalPrice,
                         onValueChange = {
-                            // Solo permite números
                             if (it.all { char -> char.isDigit() }) {
                                 goalPrice = it
                             }
@@ -138,22 +143,17 @@ fun GoalScreen(
                         placeholder = { Text(stringResource(R.string.placeholder_price_large)) },
                         shape = RoundedCornerShape(50),
                         modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), // Teclado numérico
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Botón Guardar
                     Button(
                         onClick = {
-                            val result = viewModel.saveGoal(goalName, goalPrice)
-                            message = result
-                            // Limpiar campos si fue exitoso (opcional, depende de lo que retorne tu VM)
-                            if (result.contains("éxito", ignoreCase = true) || result.contains("guardad", ignoreCase = true)) {
-                                goalName = ""
-                                goalPrice = ""
-                            }
+                            // 3. Llamada corregida pasando el ID del usuario
+                            val userId = currentUser?.id ?: ""
+                            viewModel.saveGoal(userId, goalName, goalPrice)
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -164,15 +164,23 @@ fun GoalScreen(
                         Text(stringResource(R.string.btn_save), color = Color.White)
                     }
 
-                    if (message.isNotEmpty()) {
+                    // 4. Mostrar el mensaje del estado
+                    message?.let { msg ->
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = message,
-                            color = if (message.contains("error", true)) Color.Red else Color(0xFF1A73E8),
+                            text = msg,
+                            color = if (msg.contains("Error", true)) Color.Red else Color(0xFF1A73E8),
                             fontSize = 14.sp,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth()
                         )
+
+                        // Limpiar campos si fue exitoso
+                        if (msg.contains("éxito", ignoreCase = true)) {
+                            goalName = ""
+                            goalPrice = ""
+                            // Opcional: llamar a onClose() después de un delay
+                        }
                     }
                 }
             }
