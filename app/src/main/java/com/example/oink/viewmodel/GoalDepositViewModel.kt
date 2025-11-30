@@ -1,10 +1,18 @@
 package com.example.oink.viewmodel
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.oink.data.model.GoalDeposit
 import com.example.oink.data.repository.GoalRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.util.Date
+import kotlinx.coroutines.flow.asStateFlow
 
 class GoalDepositViewModel : ViewModel() {
 
@@ -13,14 +21,34 @@ class GoalDepositViewModel : ViewModel() {
     val isLoading = mutableStateOf(false)
     val messageState = mutableStateOf<String?>(null)
 
-    fun saveDeposit(userId: String, goalName: String, amount: String) {
-        if (goalName.isBlank() || amount.isBlank()) {
-            messageState.value = "Por favor ingresa un monto válido"
-            return
-        }
+    private val _depositsList = MutableStateFlow<List<GoalDeposit>>(emptyList())
+    val depositsList: StateFlow<List<GoalDeposit>> = _depositsList.asStateFlow()
 
-        if (userId.isBlank()) {
-            messageState.value = "Error: Usuario no identificado."
+
+    private var depositsCollector: Job? = null
+
+    fun loadDeposits(goalId: String) {
+        if (goalId.isBlank()) return
+
+
+        depositsCollector?.cancel()
+
+        depositsCollector = viewModelScope.launch {
+            try {
+
+                repository.getDepositsByGoalIdRealtime(goalId).collectLatest { list ->
+                    _depositsList.value = list
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                messageState.value = "Error al cargar abonos: ${e.message}"
+            }
+        }
+    }
+
+    fun saveDeposit(userId: String, goalId: String, amount: String, userDate: Date) {
+        if (amount.isBlank() || goalId.isBlank()) {
+            messageState.value = "Por favor ingresa un monto válido"
             return
         }
 
@@ -33,12 +61,34 @@ class GoalDepositViewModel : ViewModel() {
         viewModelScope.launch {
             isLoading.value = true
             try {
-                // Buscamos la meta por nombre y le sumamos el dinero
-                repository.addDepositByName(userId, goalName, depositAmount)
-                messageState.value = "¡Abono de $$depositAmount realizado!"
+                val deposit = GoalDeposit(
+                    userId = userId,
+                    goalId = goalId,
+                    amount = depositAmount,
+                    date = userDate
+                )
+                repository.addDeposit(deposit)
+                messageState.value = "¡Abono de $${depositAmount} realizado!"
             } catch (e: Exception) {
                 e.printStackTrace()
                 messageState.value = "Error: ${e.message}"
+            } finally {
+                isLoading.value = false
+            }
+        }
+    }
+
+
+    fun deleteDeposit(deposit: GoalDeposit) {
+        viewModelScope.launch {
+            isLoading.value = true
+            try {
+                // Deja que solo el repositorio trabaje
+                repository.deleteDeposit(deposit)
+                // ELIMINA la línea: depositsList.remove(deposit)
+                messageState.value = "Abono eliminado con éxito."
+            } catch (e: Exception) {
+                // ...
             } finally {
                 isLoading.value = false
             }

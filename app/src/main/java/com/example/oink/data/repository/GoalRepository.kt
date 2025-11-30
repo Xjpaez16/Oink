@@ -1,60 +1,79 @@
 package com.example.oink.data.repository
 
 import com.example.oink.data.model.Goal
+import com.example.oink.data.model.GoalDeposit
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.channels.awaitClose // 👈 NUEVO
-import kotlinx.coroutines.flow.callbackFlow // 👈 NUEVO
+import com.google.firebase.firestore.Query
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class GoalRepository(
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) {
-    private val collection = db.collection("goals")
+    private val goalsCollection = db.collection("goals")
 
-    // --- Crear una nueva meta (se mantiene igual) ---
+
     suspend fun addGoal(goal: Goal) {
-        val ref = collection.document()
+        val ref = goalsCollection.document()
         val goalWithId = goal.copy(id = ref.id)
         ref.set(goalWithId).await()
     }
 
-    // --- 🆕 OBTENER METAS EN TIEMPO REAL CON FLOW (CORRECCIÓN CLAVE) ---
-    // Ahora devuelve un Flow<List<Goal>>, lo que permite la observación continua.
     fun getGoalsByUserRealtime(userId: String) = callbackFlow<List<Goal>> {
-        val listener = collection
+        val listener = goalsCollection
             .whereEqualTo("userId", userId)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    close(error) // Cierra el Flow si hay error
+                    close(error)
                     return@addSnapshotListener
                 }
-                // Mapea y emite la lista cada vez que hay un cambio en Firestore
                 val goalsList = snapshot?.toObjects(Goal::class.java) ?: emptyList()
                 trySend(goalsList)
             }
-
-        // Esta lambda se llama cuando el colector del Flow cancela la escucha
         awaitClose { listener.remove() }
     }
 
-    // La versión 'suspend fun getGoalsByUser' anterior ya no es necesaria para la UI que requiere refresco.
 
-    // --- Abonar dinero a una meta buscando por Nombre y Usuario (se mantiene igual) ---
-    suspend fun addDepositByName(userId: String, goalName: String, amount: Long) {
-        // ... (Tu lógica de addDepositByName se mantiene igual) ...
-        val query = collection
-            .whereEqualTo("userId", userId)
-            .whereEqualTo("name", goalName)
-            .limit(1)
-            .get()
-            .await()
 
-        if (!query.isEmpty) {
-            val doc = query.documents.first()
-            doc.reference.update("amountSaved", FieldValue.increment(amount)).await()
-        } else {
-            throw Exception("Meta no encontrada: $goalName")
-        }
+
+    suspend fun addDeposit(deposit: GoalDeposit) {
+        // Obtenemos la referencia a la subcolección 'deposits' dentro de la meta específica.
+        val depositsSubCollection = goalsCollection.document(deposit.goalId).collection("deposits")
+
+        val depositRef = depositsSubCollection.document()
+        val depositWithId = deposit.copy(id = depositRef.id)
+        depositRef.set(depositWithId).await()
+
+        val goalRef = goalsCollection.document(deposit.goalId)
+        goalRef.update("amountSaved", FieldValue.increment(deposit.amount)).await()
+    }
+
+    // Lectura de la subcolección
+    fun getDepositsByGoalIdRealtime(goalId: String) = callbackFlow<List<GoalDeposit>> {
+        val listener = goalsCollection.document(goalId).collection("deposits")
+            .orderBy("date", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                val depositsList = snapshot?.toObjects(GoalDeposit::class.java) ?: emptyList()
+                trySend(depositsList)
+            }
+        awaitClose { listener.remove() }
+    }
+
+    // Eliminacion de la subcolección
+    suspend fun deleteDeposit(deposit: GoalDeposit) {
+        val depositRef = goalsCollection.document(deposit.goalId).collection("deposits").document(deposit.id)
+        val goalRef = goalsCollection.document(deposit.goalId)
+
+        db.runTransaction { transaction ->
+            transaction.update(goalRef, "amountSaved", FieldValue.increment(-deposit.amount))
+            transaction.delete(depositRef)
+            null
+        }.await()
     }
 }

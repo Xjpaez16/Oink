@@ -41,8 +41,6 @@ fun select_goals_view(
     val goalsList = goalViewModel.goalsList
     val isLoading = goalViewModel.isLoading.value
 
-    // Carga/observación de metas cuando la vista se compone
-    // y cada vez que el ID del usuario cambie.
     LaunchedEffect(currentUser) {
         currentUser?.id?.let { userId ->
             goalViewModel.loadGoals(userId)
@@ -71,7 +69,7 @@ fun select_goals_view(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // --- Encabezado ---
+
             item {
                 Spacer(modifier = Modifier.height(40.dp))
                 Text(
@@ -92,7 +90,7 @@ fun select_goals_view(
                 Spacer(modifier = Modifier.height(40.dp))
             }
 
-            // --- Título de la Sección ---
+
             item {
                 Text(
                     text = stringResource(R.string.goals_title),
@@ -117,6 +115,8 @@ fun select_goals_view(
             } else if (goalsList.isNotEmpty()) {
                 items(goalsList) { goal ->
                     ObjetivoCard(
+                        navController = navController,
+                        goalId = goal.id,
                         titulo = goal.name,
                         actual = goal.amountSaved.toDouble(),
                         meta = goal.amountTarget.toDouble()
@@ -141,8 +141,11 @@ fun select_goals_view(
 
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ObjetivoCard(
+    navController: NavController,
+    goalId: String,
     titulo: String,
     actual: Double,
     meta: Double
@@ -152,13 +155,15 @@ fun ObjetivoCard(
     val progress = (actual / meta).coerceIn(0.0, 1.0).toFloat()
 
     Card(
+        onClick = {
+            navController.navigate("deposit_goal_screen/$goalId/$titulo")
+        },
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         border = BorderStroke(1.dp, colorAccent),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        // TODO: Agregar onClick para navegar a GoalDepositScreen
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

@@ -5,8 +5,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.oink.data.model.MovementType
 import com.example.oink.data.model.User
 import com.example.oink.ui.consult_movs.Consult_movs_view
@@ -14,6 +16,7 @@ import com.example.oink.ui.enter_expenses.Enter_expense_view
 import com.example.oink.ui.enter_money.Enter_money_view
 import com.example.oink.ui.expense.ExpenseScreen
 import com.example.oink.ui.goal.GoalScreen
+import com.example.oink.ui.goaldeposit.GoalDepositScreen
 import com.example.oink.ui.home.BalanceScreen
 import com.example.oink.ui.income.IncomeScreen
 import com.example.oink.ui.loginApp.LoginScreen
@@ -140,7 +143,6 @@ fun AppNavGraph(navController : NavHostController ){
                 ReportScreen(navController = navController, userName = user.name)
             }
         }
-        // ... código arriba permanece igual ...
 
         composable(NavRoutes.Login.route) {
             LoginScreen(
@@ -156,15 +158,13 @@ fun AppNavGraph(navController : NavHostController ){
             )
         }
 
-// ... más abajo: si select_goals_view y/o GoalScreen piden authViewModel, pásalo también:
-
         composable(NavRoutes.SelectGoal.route) {
             val user = authViewModel.getLoggedUser()
             if (user != null) {
                 select_goals_view(
                     navController = navController,
                     userName = user.name,
-                    authViewModel = authViewModel, // <-- agrega solo si la firma lo requiere
+                    authViewModel = authViewModel,
                     onNavigateToadd = { navController.navigate(NavRoutes.Goal.route) }
                 )
             }
@@ -177,15 +177,37 @@ fun AppNavGraph(navController : NavHostController ){
                 GoalScreen(
                     userName = user.name,
                     viewModel = goalViewModel,
-                    authViewModel = authViewModel, // <-- agrega solo si la firma lo requiere
+                    authViewModel = authViewModel,
                     onClose = { navController.popBackStack() },
                     navController = navController
                 )
             }
         }
 
+        composable(
+            route = NavRoutes.DepositGoal.route,
+            arguments = listOf(
+                navArgument("goalId") { type = NavType.StringType },
+                navArgument("goalName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
 
+            val goalId = backStackEntry.arguments?.getString("goalId") ?: ""
+            val goalName = backStackEntry.arguments?.getString("goalName") ?: "Meta Desconocida"
+            val user = authViewModel.getLoggedUser()
 
+            if (user != null && goalId.isNotBlank()) {
+                GoalDepositScreen(
+                    userName = user.name,
+                    goalId = goalId,
+                    goalName = goalName,
+                    authViewModel = authViewModel,
+                    onClose = { navController.popBackStack() }
+                )
+            } else {
+                navController.popBackStack()
+            }
+        }
 
         composable(NavRoutes.Consult_movs.route) {
             Consult_movs_view(navController = navController)
