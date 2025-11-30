@@ -16,19 +16,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.oink.R
+import com.example.oink.data.model.Movement
+import com.example.oink.data.model.MovementType
+import com.example.oink.data.model.RecurringMovement
+import com.example.oink.viewmodel.ExpenseMovemetViewModel
+import com.example.oink.viewmodel.ExpenseRecurringMovementViewModel
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandMore
+import java.util.concurrent.TimeUnit
+import kotlin.collections.List
 
 @Composable
 fun Enter_money_view(
+
+    movementViewModel: ExpenseMovemetViewModel = viewModel(),
+    recurringViewModel: ExpenseRecurringMovementViewModel = viewModel(),
+    userId: String = "TEST_USER", // Simula el ID del usuario
     onBackClick: () -> Unit = {}
 ) {
     var description by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") }
     var categoriaSeleccionada by remember { mutableStateOf<Pair<String, Int>?>(null) }
+
+
+    var isRecurring by remember { mutableStateOf(false) }
+    var selectedFrequency by remember { mutableStateOf("monthly") }
+
+
     val noneCategory = stringResource(R.string.category_none)
+    val colorAccent = Color(0xFF2997FD)
 
     Box(
         modifier = Modifier
@@ -38,10 +59,10 @@ fun Enter_money_view(
     ) {
         Column(modifier = Modifier.padding(top = 200.dp)) {
 
-            // Título
+
             Text(
                 text = stringResource(R.string.title_income_entry),
-                color = Color(0xFF2997FD),
+                color = colorAccent,
                 fontSize = 70.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 30.dp)
@@ -49,7 +70,7 @@ fun Enter_money_view(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Campos de texto
+
             TextField(
                 value = description,
                 onValueChange = { description = it },
@@ -67,6 +88,7 @@ fun Enter_money_view(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Campo monto
             TextField(
                 value = amount,
                 onValueChange = { amount = it },
@@ -84,16 +106,50 @@ fun Enter_money_view(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Selector de fecha
+
             CalendarPickerExample(selectedDate) { selectedDate = it }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Lista de categorías
+
             ListaCategorias(
                 selectedCategoria = categoriaSeleccionada,
                 onCategoriaSelected = { categoriaSeleccionada = it }
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 30.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Ingreso Recurrente",
+                    color = Color.Black,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Switch(
+                    checked = isRecurring,
+                    onCheckedChange = { isRecurring = it },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = colorAccent,
+                        checkedTrackColor = colorAccent.copy(alpha = 0.5f)
+                    )
+                )
+            }
+
+            //SELECTOR DE FRECUENCIA
+            if (isRecurring) {
+                Spacer(modifier = Modifier.height(8.dp))
+                FrequencyDropdown(
+                    selectedFrequency = selectedFrequency,
+                    onFrequencySelected = { selectedFrequency = it }
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -103,12 +159,15 @@ fun Enter_money_view(
                 modifier = Modifier.padding(start = 30.dp)
             ) {
                 Button(
-                    onClick = { onBackClick()
-                        // Cancelar: limpiar todos los campos
+                    onClick = {
+                        // Limpiar y volver
                         description = ""
                         amount = ""
                         selectedDate = ""
                         categoriaSeleccionada = null
+                        isRecurring = false
+                        selectedFrequency = "monthly"
+                        onBackClick()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
                 ) {
@@ -117,13 +176,88 @@ fun Enter_money_view(
 
                 Button(
                     onClick = {
-                        // Guardar: procesar datos (aquí puedes enviar a tu backend o base de datos)
-                        println("Descripción: $description")
-                        println("Monto: $amount")
-                        println("Fecha: $selectedDate")
-                        println("Categoría: ${categoriaSeleccionada?.first ?: noneCategory}")
+
+                        if (description.isEmpty() ||
+                            amount.isEmpty() ||
+                            selectedDate.isEmpty() ||
+                            categoriaSeleccionada == null ||
+                            (isRecurring && selectedFrequency.isEmpty())
+                        ) {
+                            println("Campos incompletos")
+                            return@Button
+                        }
+
+
+                        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        val parsedDate = formatter.parse(selectedDate) ?: Date()
+                        val amountLong = amount.toLongOrNull() ?: 0L
+                        val categoryName = categoriaSeleccionada!!.first
+                        val typeIncome = MovementType.INCOME.name
+
+                        if (isRecurring) {
+                            // Flujo Recurrente: Se guarda en recurring_movements
+                            val nextExecutionDate = calculateNextExecution(parsedDate, selectedFrequency)
+
+                            val recurringMovement = RecurringMovement(
+                                amount = amountLong,
+                                category = categoryName,
+                                createdAt = parsedDate,
+                                frequency = selectedFrequency,
+                                nextExecution = nextExecutionDate,
+                                type = typeIncome.lowercase(), // "income"
+                                userId = userId
+                            )
+
+                            // 1. Guardar en 'recurring_movements'
+                            recurringViewModel.createRecurringMovement(recurringMovement) {
+                                // 2. Guardar la primera instancia en 'movements'
+                                val initialMovement = Movement(
+                                    amount = amountLong,
+                                    category = categoryName,
+                                    date = parsedDate,
+                                    description = description,
+                                    isRecurring = true,
+                                    type = typeIncome, // "INCOME"
+                                    userId = userId,
+                                    frequency = selectedFrequency
+                                )
+                                movementViewModel.createMovement(initialMovement) {
+                                    println("Ingreso recurrente guardado correctamente")
+                                    // Limpiar UI y volver
+                                    description = ""
+                                    amount = ""
+                                    selectedDate = ""
+                                    categoriaSeleccionada = null
+                                    isRecurring = false
+                                    selectedFrequency = "monthly"
+                                    onBackClick()
+                                }
+                            }
+                        } else {
+                            // Flujo No Recurrente: Se guarda solo en movements
+                            val movement = Movement(
+                                amount = amountLong,
+                                category = categoryName,
+                                date = parsedDate,
+                                description = description,
+                                isRecurring = false,
+                                type = typeIncome, // "INCOME"
+                                userId = userId,
+                                frequency = null
+                            )
+                            // Guardar en 'movements'
+                            movementViewModel.createMovement(movement) {
+                                println("Ingreso guardado correctamente")
+                                // Limpiar UI y volver
+                                description = ""
+                                amount = ""
+                                selectedDate = ""
+                                categoriaSeleccionada = null
+                                onBackClick()
+                            }
+                        }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2997FD))
+                    colors = ButtonDefaults.buttonColors(containerColor = colorAccent)
                 ) {
                     Text(stringResource(R.string.btn_save), color = Color.White)
                 }
@@ -132,11 +266,88 @@ fun Enter_money_view(
     }
 }
 
+
+// FUNCIÓN DE CÁLCULO DE NEXT EXECUTION
+fun calculateNextExecution(currentDate: Date, frequency: String): Date {
+    val calendar = Calendar.getInstance()
+    calendar.time = currentDate
+
+    when (frequency) {
+        "daily" -> calendar.add(Calendar.DAY_OF_YEAR, 1)
+        "weekly" -> calendar.add(Calendar.WEEK_OF_YEAR, 1)
+        "monthly" -> calendar.add(Calendar.MONTH, 1)
+        "annually" -> calendar.add(Calendar.YEAR, 1)
+    }
+    return calendar.time
+}
+
+// DROPDOWN DE FRECUENCIA
+@Composable
+fun FrequencyDropdown(
+    selectedFrequency: String,
+    onFrequencySelected: (String) -> Unit
+) {
+    val frequencies = listOf(
+        "Diariamente" to "daily",
+        "Semanalmente" to "weekly",
+        "Mensualmente" to "monthly",
+        "Anualmente" to "annually"
+    )
+    var expanded by remember { mutableStateOf(false) }
+
+    val displayValue = frequencies.find { it.second == selectedFrequency }?.first ?: "Mensualmente"
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp)
+    ) {
+        Text(
+            text = "Frecuencia de Repetición",
+            color = Color.Black,
+            fontSize = 14.sp,
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
+
+        OutlinedButton(
+            onClick = { expanded = true },
+            modifier = Modifier.fillMaxWidth(),
+            border = BorderStroke(1.dp, Color.LightGray)
+        ) {
+            Text(displayValue, color = Color.Black)
+            Icon(
+                imageVector = Icons.Default.ExpandMore,
+                contentDescription = null,
+                tint = Color.Black,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth(0.9f)
+        ) {
+            frequencies.forEach { (label, value) ->
+                DropdownMenuItem(
+                    text = { Text(label) },
+                    onClick = {
+                        onFrequencySelected(value)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+// LISTA DE CATEGORÍAS
 @Composable
 fun ListaCategorias(
     selectedCategoria: Pair<String, Int>?,
     onCategoriaSelected: (Pair<String, Int>) -> Unit
 ) {
+    // Lista de Categorias
     val categorias: List<Pair<String, Int>> = listOf(
         stringResource(R.string.cat_work) to R.drawable.work_2,
         stringResource(R.string.cat_gifts) to R.drawable.donations_1,
@@ -186,6 +397,7 @@ fun ListaCategorias(
     }
 }
 
+// SELECTOR DE FECHA
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarPickerExample(
