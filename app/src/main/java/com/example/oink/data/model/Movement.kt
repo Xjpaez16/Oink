@@ -11,7 +11,8 @@ data class Movement(
     val description: String = "",
     val isRecurring: Boolean = false,
     val type: String = "",
-    val userId: String = ""
+    val userId: String = "",
+    val frequency: String? = null
 )
 
 enum class MovementType{

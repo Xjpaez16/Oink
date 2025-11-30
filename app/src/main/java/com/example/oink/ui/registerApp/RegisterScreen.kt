@@ -108,7 +108,7 @@ fun RegisterScreen(
                     viewModel.registerWithGoogle(
                         googleId = googleIdTokenCredential.id,
                         name = googleIdTokenCredential.displayName ?: "Usuario Google",
-                        email = googleIdTokenCredential.id // Nota: googleIdTokenCredential.id suele ser el email en esta librería
+                        email = email // Nota: googleIdTokenCredential.id suele ser el email en esta librería
                     )
                 }
             } catch (e: GetCredentialException) {

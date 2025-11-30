@@ -16,19 +16,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.oink.R
+import com.example.oink.data.model.Movement
+import com.example.oink.data.model.MovementType
+import com.example.oink.data.model.RecurringMovement
+import com.example.oink.viewmodel.ExpenseMovemetViewModel
+import com.example.oink.viewmodel.ExpenseRecurringMovementViewModel // Asegúrate de usar el nombre correcto del VM
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandMore
+import java.util.concurrent.TimeUnit
+
 
 @Composable
 fun Enter_expense_view(
+    movementViewModel: ExpenseMovemetViewModel = viewModel(),
+    // Usamos el nombre del VM que acordamos: RecurringMovementViewModel
+    recurringViewModel: ExpenseRecurringMovementViewModel = viewModel(),
+    userId: String = "TEST_USER",
     onBackClick: () -> Unit = {}
 ) {
     var description by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") }
     var categoriaSeleccionada by remember { mutableStateOf<Pair<String, Int>?>(null) }
+
+    // ⬇️ ESTADOS NUEVOS PARA RECURRENCIA
+    var isRecurring by remember { mutableStateOf(false) }
+    var selectedFrequency by remember { mutableStateOf("monthly") } // Valor por defecto
+    // ⬆️ ESTADOS NUEVOS
+
     val noneCategory = stringResource(R.string.category_none)
+    val colorAccent = Color(0xFF2997FD)
 
     Box(
         modifier = Modifier
@@ -41,7 +62,7 @@ fun Enter_expense_view(
             // Título
             Text(
                 text = stringResource(R.string.title_expenses_entry),
-                color = Color(0xFF2997FD),
+                color = colorAccent,
                 fontSize = 70.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 30.dp)
@@ -49,11 +70,18 @@ fun Enter_expense_view(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Campos de texto
+            // Campo descripción
             TextField(
                 value = description,
                 onValueChange = { description = it },
-                placeholder = { Text(stringResource(R.string.hint_description), color = Color.LightGray, fontSize = 40.sp, fontWeight = FontWeight.Bold) },
+                placeholder = {
+                    Text(
+                        stringResource(R.string.hint_description), // RESTAURADO EL PLACEHOLDER
+                        color = Color.LightGray,
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
@@ -67,10 +95,18 @@ fun Enter_expense_view(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Campo monto
             TextField(
                 value = amount,
                 onValueChange = { amount = it },
-                placeholder = { Text(stringResource(R.string.hint_amount), color = Color.LightGray, fontSize = 40.sp, fontWeight = FontWeight.Bold) },
+                placeholder = {
+                    Text(
+                        stringResource(R.string.hint_amount), // RESTAURADO EL PLACEHOLDER
+                        color = Color.LightGray,
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
@@ -84,31 +120,74 @@ fun Enter_expense_view(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Selector de fecha
+            // Fecha
             CalendarPickerExample(selectedDate) { selectedDate = it }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Lista de categorías
-            ListaCategorias(
+            // Categorías
+            ListaCategorias( // RESTAURADA LA LLAMADA A LISTACATEGORIAS
                 selectedCategoria = categoriaSeleccionada,
                 onCategoriaSelected = { categoriaSeleccionada = it }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botones Guardar y Cancelar
+            // ---------------------------------------------------------
+            // 🆕 SECCIÓN DE RECURRENCIA (Switch)
+            // ---------------------------------------------------------
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 30.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Gasto Recurrente",
+                    color = Color.Black,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Switch(
+                    checked = isRecurring,
+                    onCheckedChange = { isRecurring = it },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = colorAccent,
+                        checkedTrackColor = colorAccent.copy(alpha = 0.5f)
+                    )
+                )
+            }
+
+            // 🆕 SELECTOR DE FRECUENCIA (CONDICIONAL)
+            if (isRecurring) {
+                Spacer(modifier = Modifier.height(8.dp))
+                FrequencyDropdown(
+                    selectedFrequency = selectedFrequency,
+                    onFrequencySelected = { selectedFrequency = it }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            //---------------------------------------------------------
+            // BOTONES
+            //---------------------------------------------------------
             Row(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.padding(start = 30.dp)
             ) {
                 Button(
-                    onClick = { onBackClick()
-                        // Cancelar: limpiar todos los campos
+                    onClick = {
+                        // Limpiar y volver
                         description = ""
                         amount = ""
                         selectedDate = ""
                         categoriaSeleccionada = null
+                        isRecurring = false
+                        selectedFrequency = "monthly"
+                        onBackClick()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
                 ) {
@@ -117,13 +196,85 @@ fun Enter_expense_view(
 
                 Button(
                     onClick = {
-                        // Guardar: procesar datos (aquí puedes enviar a tu backend o base de datos)
-                        println("Descripción: $description")
-                        println("Monto: $amount")
-                        println("Fecha: $selectedDate")
-                        println("Categoría: ${categoriaSeleccionada?.first ?: noneCategory}")
+                        // Lógica de validación
+                        if (description.isEmpty() ||
+                            amount.isEmpty() ||
+                            selectedDate.isEmpty() ||
+                            categoriaSeleccionada == null ||
+                            (isRecurring && selectedFrequency.isEmpty())
+                        ) {
+                            println("Campos incompletos")
+                            return@Button
+                        }
+
+                        // Preparación de datos
+                        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        val parsedDate = formatter.parse(selectedDate) ?: Date()
+                        val amountLong = amount.toLongOrNull() ?: 0L
+                        val categoryName = categoriaSeleccionada!!.first
+
+                        if (isRecurring) {
+                            // Flujo Recurrente
+                            val nextExecutionDate = calculateNextExecution(parsedDate, selectedFrequency)
+
+                            val recurringMovement = RecurringMovement(
+                                amount = amountLong,
+                                category = categoryName,
+                                createdAt = parsedDate,
+                                frequency = selectedFrequency,
+                                nextExecution = nextExecutionDate,
+                                type = MovementType.EXPENSE.name.lowercase(),
+                                userId = userId
+                            )
+
+                            // 1. Guardar en 'recurring_movements'
+                            recurringViewModel.createRecurringMovement(recurringMovement) {
+                                // 2. Guardar la primera instancia en 'movements'
+                                val initialMovement = Movement(
+                                    amount = amountLong,
+                                    category = categoryName,
+                                    date = parsedDate,
+                                    description = description,
+                                    isRecurring = true,
+                                    type = MovementType.EXPENSE.name,
+                                    userId = userId,
+                                    frequency = selectedFrequency
+                                )
+                                movementViewModel.createMovement(initialMovement) {
+                                    // Limpiar UI y volver
+                                    description = ""
+                                    amount = ""
+                                    selectedDate = ""
+                                    categoriaSeleccionada = null
+                                    isRecurring = false
+                                    selectedFrequency = "monthly"
+                                    onBackClick()
+                                }
+                            }
+                        } else {
+                            // Flujo No Recurrente
+                            val movement = Movement(
+                                amount = amountLong,
+                                category = categoryName,
+                                date = parsedDate,
+                                description = description,
+                                isRecurring = false,
+                                type = MovementType.EXPENSE.name,
+                                userId = userId,
+                                frequency = null
+                            )
+                            // Guardar en 'movements'
+                            movementViewModel.createMovement(movement) {
+                                // Limpiar UI y volver
+                                description = ""
+                                amount = ""
+                                selectedDate = ""
+                                categoriaSeleccionada = null
+                                onBackClick()
+                            }
+                        }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2997FD))
+                    colors = ButtonDefaults.buttonColors(containerColor = colorAccent)
                 ) {
                     Text(stringResource(R.string.btn_save), color = Color.White)
                 }
@@ -132,6 +283,85 @@ fun Enter_expense_view(
     }
 }
 
+// ---------------------------------------------------------
+// 🔄 FUNCIONES RESTAURADAS
+// ---------------------------------------------------------
+
+// 🆕 Composable para el selector de Frecuencia (Corregido el Icono)
+@Composable
+fun FrequencyDropdown(
+    selectedFrequency: String,
+    onFrequencySelected: (String) -> Unit
+) {
+    val frequencies = listOf(
+        "Diariamente" to "daily",
+        "Semanalmente" to "weekly",
+        "Mensualmente" to "monthly",
+        "Anualmente" to "annually"
+    )
+    var expanded by remember { mutableStateOf(false) }
+
+    val displayValue = frequencies.find { it.second == selectedFrequency }?.first ?: "Mensualmente"
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 30.dp)
+    ) {
+        Text(
+            text = "Frecuencia de Repetición",
+            color = Color.Black,
+            fontSize = 14.sp,
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
+
+        OutlinedButton(
+            onClick = { expanded = true },
+            modifier = Modifier.fillMaxWidth(),
+            border = BorderStroke(1.dp, Color.LightGray)
+        ) {
+            Text(displayValue, color = Color.Black)
+            Icon(
+                imageVector = Icons.Default.ExpandMore, // USO CORRECTO DEL ICONO
+                contentDescription = null,
+                tint = Color.Black,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth(0.9f)
+        ) {
+            frequencies.forEach { (label, value) ->
+                DropdownMenuItem(
+                    text = { Text(label) },
+                    onClick = {
+                        onFrequencySelected(value)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+// 🆕 Función para calcular la fecha de la próxima ejecución
+fun calculateNextExecution(currentDate: Date, frequency: String): Date {
+    val calendar = Calendar.getInstance()
+    calendar.time = currentDate
+
+    when (frequency) {
+        "daily" -> calendar.add(Calendar.DAY_OF_YEAR, 1)
+        "weekly" -> calendar.add(Calendar.WEEK_OF_YEAR, 1)
+        "monthly" -> calendar.add(Calendar.MONTH, 1)
+        "annually" -> calendar.add(Calendar.YEAR, 1)
+    }
+    return calendar.time
+}
+
+// RESTAURADA: Lista de categorías
 @Composable
 fun ListaCategorias(
     selectedCategoria: Pair<String, Int>?,
@@ -191,6 +421,7 @@ fun ListaCategorias(
     }
 }
 
+// RESTAURADA: Selector de fecha (CalendarPickerExample)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarPickerExample(
@@ -199,6 +430,7 @@ fun CalendarPickerExample(
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
+    val colorAccent = Color(0xFF2997FD)
 
     if (showDialog) {
         DatePickerDialog(
@@ -226,7 +458,7 @@ fun CalendarPickerExample(
 
     Button(
         onClick = { showDialog = true },
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2997FD)),
+        colors = ButtonDefaults.buttonColors(containerColor = colorAccent),
         modifier = Modifier
             .padding(start = 30.dp)
             .height(60.dp)

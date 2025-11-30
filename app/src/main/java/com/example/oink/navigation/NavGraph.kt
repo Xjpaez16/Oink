@@ -140,17 +140,35 @@ fun AppNavGraph(navController : NavHostController ){
                 ReportScreen(navController = navController, userName = user.name)
             }
         }
+        // ... código arriba permanece igual ...
+
+        composable(NavRoutes.Login.route) {
+            LoginScreen(
+                viewModel = authViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(NavRoutes.Register.route) {
+            RegisterScreen(
+                viewModel = authViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+// ... más abajo: si select_goals_view y/o GoalScreen piden authViewModel, pásalo también:
+
         composable(NavRoutes.SelectGoal.route) {
             val user = authViewModel.getLoggedUser()
             if (user != null) {
                 select_goals_view(
                     navController = navController,
                     userName = user.name,
-                    onNavigateToadd = {navController.navigate(NavRoutes.Goal.route)}
+                    authViewModel = authViewModel, // <-- agrega solo si la firma lo requiere
+                    onNavigateToadd = { navController.navigate(NavRoutes.Goal.route) }
                 )
             }
         }
-
 
         composable(NavRoutes.Goal.route) {
             val goalViewModel: GoalViewModel = viewModel()
@@ -159,11 +177,16 @@ fun AppNavGraph(navController : NavHostController ){
                 GoalScreen(
                     userName = user.name,
                     viewModel = goalViewModel,
-                    onClose = {navController.popBackStack()},
+                    authViewModel = authViewModel, // <-- agrega solo si la firma lo requiere
+                    onClose = { navController.popBackStack() },
                     navController = navController
-                    )
+                )
             }
         }
+
+
+
+
         composable(NavRoutes.Consult_movs.route) {
             Consult_movs_view(navController = navController)
         }

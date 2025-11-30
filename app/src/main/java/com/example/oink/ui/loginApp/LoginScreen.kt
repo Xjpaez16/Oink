@@ -97,7 +97,7 @@ fun LoginScreen(
                     viewModel.handleGoogleLogin(
                         googleId = googleIdTokenCredential.id,
                         name = googleIdTokenCredential.displayName ?: "Usuario Google",
-                        email = googleIdTokenCredential.id
+                        email = email
                     )
                 }
             } catch (e: GetCredentialException) {
