@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -28,16 +29,25 @@ import com.example.oink.viewmodel.GoalViewModel
 @Composable
 fun select_goals_view(
     navController: NavController,
-    authViewModel: AuthViewModel, // 1. Inyectamos AuthViewModel
-    // goalViewModel: GoalViewModel = viewModel(), // Descomentar cuando implementes loadGoals()
-    userName: String = "Yorch" ,
+    authViewModel: AuthViewModel = viewModel(),
+    goalViewModel: GoalViewModel = viewModel(),
+    userName: String = "Yorch",
     onNavigateToadd: () -> Unit,
 ) {
-    // val currentUser = authViewModel.currentUser.value
-    // LaunchedEffect(Unit) {
-    //    currentUser?.id?.let { goalViewModel.loadGoals(it) }
-    // }
-    // val goals = goalViewModel.goalsList // Suponiendo que tengas esta lista
+
+    val currentUser = authViewModel.currentUser.value
+
+
+    val goalsList = goalViewModel.goalsList
+    val isLoading = goalViewModel.isLoading.value
+
+    // Carga/observación de metas cuando la vista se compone
+    // y cada vez que el ID del usuario cambie.
+    LaunchedEffect(currentUser) {
+        currentUser?.id?.let { userId ->
+            goalViewModel.loadGoals(userId)
+        }
+    }
 
     Scaffold(
         bottomBar = { BottomNavBar(navController) },
@@ -61,6 +71,7 @@ fun select_goals_view(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
+            // --- Encabezado ---
             item {
                 Spacer(modifier = Modifier.height(40.dp))
                 Text(
@@ -81,6 +92,7 @@ fun select_goals_view(
                 Spacer(modifier = Modifier.height(40.dp))
             }
 
+            // --- Título de la Sección ---
             item {
                 Text(
                     text = stringResource(R.string.goals_title),
@@ -94,17 +106,40 @@ fun select_goals_view(
                 )
             }
 
-            // AQUÍ LISTARÍAS TUS METAS REALES
-            // items(goals) { goal -> ObjetivoCard(goal.name, goal.amountSaved.toDouble(), goal.amountTarget.toDouble()) }
-
-            item {
-                ObjetivoCard("Guitarra", 800000.0, 1200000.0)
-                ObjetivoCard("Moto", 1800000.0, 12000000.0)
-                Spacer(modifier = Modifier.height(80.dp))
+            // LISTADO DE METAS
+            if (isLoading && goalsList.isEmpty()) {
+                item {
+                    CircularProgressIndicator(
+                        modifier = Modifier.padding(top = 32.dp),
+                        color = Color(0xFF2997FD)
+                    )
+                }
+            } else if (goalsList.isNotEmpty()) {
+                items(goalsList) { goal ->
+                    ObjetivoCard(
+                        titulo = goal.name,
+                        actual = goal.amountSaved.toDouble(),
+                        meta = goal.amountTarget.toDouble()
+                    )
+                }
+                item {
+                    Spacer(modifier = Modifier.height(80.dp))
+                }
+            } else {
+                item {
+                    Text(
+                        text = "Aún no tienes metas registradas. Presiona el '+' para empezar a ahorrar.",
+                        color = Color.Gray,
+                        modifier = Modifier.padding(top = 32.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
 }
+
+
 
 @Composable
 fun ObjetivoCard(
@@ -112,15 +147,18 @@ fun ObjetivoCard(
     actual: Double,
     meta: Double
 ) {
+    val colorAccent = Color(0xFF2997FD)
+    // Calcula el progreso y lo limita entre 0.0 y 1.0
+    val progress = (actual / meta).coerceIn(0.0, 1.0).toFloat()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        border = BorderStroke(1.dp, Color(0xFF2997FD)),
+        border = BorderStroke(1.dp, colorAccent),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        // TODO: Agregar onClick para navegar a GoalDepositScreen con el nombre de esta meta
-        // onClick = { navController.navigate("deposit_screen/$titulo") }
+        // TODO: Agregar onClick para navegar a GoalDepositScreen
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -129,11 +167,12 @@ fun ObjetivoCard(
                 text = titulo,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                color = Color(0xFF2997FD)
+                color = colorAccent
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Barra de progreso
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -143,17 +182,21 @@ fun ObjetivoCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(fraction = (actual / meta).coerceIn(0.0, 1.0).toFloat())
+                        .fillMaxWidth(fraction = progress)
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFF2997FD))
+                        .background(colorAccent)
                 )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
+
+            val formattedActual = String.format("%,.0f", actual)
+            val formattedMeta = String.format("%,.0f", meta)
+
             Text(
-                text = stringResource(R.string.goal_progress_format, "$${String.format("%,.0f", actual)}", "$${String.format("%,.0f", meta)}"),
+                text = stringResource(R.string.goal_progress_format, "$$formattedActual", "$$formattedMeta"),
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
                 color = Color.Gray,
