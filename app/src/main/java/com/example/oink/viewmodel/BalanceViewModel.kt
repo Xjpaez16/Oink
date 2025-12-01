@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.oink.data.model.Movement
 import com.example.oink.data.model.MovementType
 import com.example.oink.data.repository.MovementRepository
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class BalanceViewModel : ViewModel() {
@@ -26,24 +27,41 @@ class BalanceViewModel : ViewModel() {
     var isLoading by mutableStateOf(false)
         private set
 
-    init {
-        loadData()
-    }
 
-    fun loadData() {
+
+    fun loadDataForUser(userId: String) {
+        if (userId.isBlank()) return
+
         viewModelScope.launch {
             isLoading = true
             try {
-                // Llamamos al repositorio y actualizamos las variables de estado
-                movements = repository.getAllMovements()
-                totalBalance = repository.getTotalBalance()
+
+                repository.getMovementsByUser(userId).collectLatest { userMovements ->
+
+                    movements = userMovements
+
+
+                    val income = userMovements
+                        .filter { it.type == MovementType.INCOME.name }
+                        .sumOf { it.amount }
+
+                    val expense = userMovements
+                        .filter { it.type == MovementType.EXPENSE.name }
+                        .sumOf { it.amount }
+
+                    totalBalance = (income - expense).toDouble()
+
+                    // Quitamos el loading una vez recibimos el primer dato
+                    isLoading = false
+                }
+
             } catch (e: Exception) {
                 e.printStackTrace()
-            } finally {
                 isLoading = false
             }
         }
     }
+
 
     // Solo dejamos esta función porque tiene lógica de filtrado
     fun getMovementsByType(type: MovementType): List<Movement> {

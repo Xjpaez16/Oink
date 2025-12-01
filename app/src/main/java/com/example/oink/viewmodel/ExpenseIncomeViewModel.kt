@@ -29,20 +29,25 @@ class ExpenseIncomeViewModel : ViewModel() {
     /**
      * Carga los movimientos filtrados por tipo (Ingreso o Gasto) desde Firebase.
      */
-    fun loadMovementsByType(type: MovementType) {
+    fun loadMovementsByType(type: MovementType, userId: String) {
+        // Si el userId viene vacío (no logueado), no hacemos nada o limpiamos
+        if (userId.isBlank()) {
+            movements = emptyList()
+            totalAmount = 0.0
+            return
+        }
+
         viewModelScope.launch {
             isLoading = true
             try {
-                // 1. Obtenemos la lista desde el repositorio (suspend function)
-                val list = repository.getMovementsByType(type)
-                movements = list
+                // USAMOS LA NUEVA FUNCIÓN DEL REPOSITORIO
+                val list = repository.getMovementsByUserAndType(userId, type)
 
-                // 2. Calculamos el total sumando los montos (Long -> Double)
+                movements = list
                 totalAmount = list.sumOf { it.amount }.toDouble()
 
             } catch (e: Exception) {
                 e.printStackTrace()
-                // Aquí podrías manejar un mensaje de error si quisieras
             } finally {
                 isLoading = false
             }
@@ -57,11 +62,11 @@ class ExpenseIncomeViewModel : ViewModel() {
             isLoading = true
             try {
                 repository.addMovement(movement)
-
-                // Recargamos la lista basada en el tipo del movimiento que acabamos de agregar
-                // Convertimos el String del modelo al Enum para reutilizar la función
+                // Recargamos usando el ID del movimiento que acabamos de guardar
                 val typeEnum = if (movement.type == MovementType.INCOME.name) MovementType.INCOME else MovementType.EXPENSE
-                loadMovementsByType(typeEnum)
+
+                // PASAMOS EL USER ID AQUÍ:
+                loadMovementsByType(typeEnum, movement.userId)
 
             } catch (e: Exception) {
                 e.printStackTrace()

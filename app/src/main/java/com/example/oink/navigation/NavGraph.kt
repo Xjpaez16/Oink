@@ -28,6 +28,8 @@ import com.example.oink.ui.startAplication.StartUpScreen
 import com.example.oink.viewmodel.AuthViewModel
 import com.example.oink.viewmodel.BalanceViewModel
 import com.example.oink.viewmodel.ExpenseIncomeViewModel
+import com.example.oink.viewmodel.ExpenseMovemetViewModel
+import com.example.oink.viewmodel.ExpenseRecurringMovementViewModel
 import com.example.oink.viewmodel.GoalViewModel
 
 @Composable
@@ -35,6 +37,9 @@ fun AppNavGraph(navController : NavHostController ){
     val authViewModel: AuthViewModel = viewModel()
     val balanceViewModel: BalanceViewModel = viewModel()
     val expenseIncomeViewModel: ExpenseIncomeViewModel = viewModel()
+    val expensemovementViewModel : ExpenseMovemetViewModel = viewModel()
+    val expenseRecurringMovementViewModel : ExpenseRecurringMovementViewModel = viewModel()
+
 
     val isLoggedIn by authViewModel.isLoggedIn
 
@@ -97,6 +102,7 @@ fun AppNavGraph(navController : NavHostController ){
                 BalanceScreen(
                     viewModel = balanceViewModel,
                     userName = user.name,
+                    authViewModel = authViewModel,
                     onNavigateToIncome = { navController.navigate(NavRoutes.Income.route) },
                     onNavigateToExpenses = { navController.navigate(NavRoutes.Expenses.route) },
                     navController = navController
@@ -107,6 +113,7 @@ fun AppNavGraph(navController : NavHostController ){
             ExpenseScreen(
                 type = MovementType.EXPENSE,
                 viewModel = expenseIncomeViewModel,
+                authViewModel = authViewModel,
                 onNavigateToIncome = { navController.navigate(NavRoutes.Income.route) },
                 onNavigateToEnter = {navController.navigate(NavRoutes.insert_expenses.route)},
                 navController = navController,
@@ -116,25 +123,39 @@ fun AppNavGraph(navController : NavHostController ){
             IncomeScreen(
                 type = MovementType.INCOME,
                 viewModel = expenseIncomeViewModel,
+                authViewModel = authViewModel,
                 onNavigateToExpense = { navController.navigate(NavRoutes.Expenses.route) },
                 onNavigateToEnter = {navController.navigate(NavRoutes.insert_income.route)},
                 navController = navController,
             )
         }
         composable(NavRoutes.insert_expenses.route) {
+            val user = authViewModel.getLoggedUser()
+            if (user != null) {
             Enter_expense_view(
+                movementViewModel = expensemovementViewModel,
+                recurringViewModel = expenseRecurringMovementViewModel,
+                userId = user.id,
                 onBackClick = {
                     navController.popBackStack()
                 }
             )
+            }
 
         }
+
         composable(NavRoutes.insert_income.route) {
+            val user = authViewModel.getLoggedUser()
+            if (user != null) {
             Enter_money_view(
+                movementViewModel = expensemovementViewModel,
+                recurringViewModel = expenseRecurringMovementViewModel,
+                userId = user.id,
                 onBackClick = {
                     navController.popBackStack()
                 }
             )
+                }
 
         }
         composable(NavRoutes.Report.route) {

@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.oink.R
 import com.example.oink.data.model.Movement
-import com.example.oink.data.model.MovementType // Importamos el Enum
+import com.example.oink.data.model.MovementType
 import com.example.oink.viewmodel.ExpenseIncomeViewModel
 
 @Composable
@@ -28,7 +28,7 @@ fun ExpenseChart(
     val movements = viewModel.movements
     val hasData = movements.isNotEmpty()
 
-    // Factor visual: reduce la altura de las barras al hacer scroll
+    // Igual que tu nuevo componente
     val heightFactor = (1f - (scrollOffset / 800f)).coerceIn(0f, 1f)
 
     Box(
@@ -40,31 +40,31 @@ fun ExpenseChart(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 0.dp)
                 .height(260.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.Bottom
         ) {
-            // 1. CORRECCIÓN: Usamos el Enum MovementType.NONE.name para rellenar el String
+
+            // ESQUELETO ANTERIOR — pero usando tu lógica actual
             val bars = if (hasData) movements else List(4) {
                 Movement(
                     id = "dummy",
                     amount = 0,
                     category = "",
-                    type = MovementType.NONE.name // Usamos el nombre del Enum ("NONE")
+                    type = MovementType.NONE.name
                 )
             }
 
-            // 2. CORRECCIÓN: Convertimos Long a Double para la matemática de la gráfica
             val maxAmount = (movements.maxOfOrNull { it.amount } ?: 1).toDouble()
 
             bars.forEachIndexed { index, movement ->
 
                 val amountDouble = movement.amount.toDouble()
 
-                // Calculamos altura relativa
                 val baseHeight = if (hasData) {
                     (amountDouble / maxAmount * 180).coerceAtLeast(50.0)
-                } else listOf(180.0, 120.0, 75.0)[index % 3] // Alturas falsas para diseño vacío
+                } else listOf(180.0, 120.0, 75.0)[index % 3]
 
                 val barHeight = baseHeight * heightFactor
 
@@ -77,7 +77,6 @@ fun ExpenseChart(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Solo mostramos contenido si la barra es visible
                     if (hasData && heightFactor > 0.3f) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -86,7 +85,6 @@ fun ExpenseChart(
                                 .padding(4.dp)
                                 .height(barHeight.dp)
                         ) {
-                            // 3. CORRECCIÓN: Función auxiliar para obtener el icono desde el String de categoría
                             Icon(
                                 painter = painterResource(id = getIconForCategory(movement.category)),
                                 contentDescription = movement.category,
@@ -108,7 +106,6 @@ fun ExpenseChart(
             }
         }
 
-        // Mensaje cuando no hay datos
         if (!hasData && heightFactor > 0.1f) {
             Text(
                 text = "Nuevo mes, añade un movimiento",
@@ -121,7 +118,6 @@ fun ExpenseChart(
     }
 }
 
-// Función para formatear números grandes (1k, 1M)
 @Composable
 fun formatShortAmount(amount: Double): String {
     return when {
@@ -133,11 +129,8 @@ fun formatShortAmount(amount: Double): String {
 
 fun Double.format(decimals: Int): String = "%.${decimals}f".format(this)
 
-// 4. NUEVA FUNCIÓN IMPORTANTE:
-// Como en tu modelo 'category' es String, necesitamos esto para saber qué icono pintar.
 fun getIconForCategory(categoryName: String): Int {
     return when (categoryName) {
-        // Nombres usados en Enter_expense.kt y Enter_money.kt
         "Transporte", "Transport" -> R.drawable.directions_bus
         "Hogar", "Home" -> R.drawable.house_2
         "Personal" -> R.drawable.man_hair_beauty_salon_3
@@ -148,7 +141,6 @@ fun getIconForCategory(categoryName: String): Int {
         "Vehiculos", "Vehicles" -> R.drawable.bike_1
         "Trabajo", "Work" -> R.drawable.work_2
         "Banco", "Bank" -> R.drawable.bank_bitcoin_svgrepo_com
-        // Icono por defecto si no coincide ninguno
         else -> R.drawable.house_2
     }
 }

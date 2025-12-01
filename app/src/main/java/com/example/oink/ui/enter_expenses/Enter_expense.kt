@@ -33,7 +33,6 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun Enter_expense_view(
     movementViewModel: ExpenseMovemetViewModel = viewModel(),
-    // Usamos el nombre del VM que acordamos: RecurringMovementViewModel
     recurringViewModel: ExpenseRecurringMovementViewModel = viewModel(),
     userId: String = "TEST_USER",
     onBackClick: () -> Unit = {}

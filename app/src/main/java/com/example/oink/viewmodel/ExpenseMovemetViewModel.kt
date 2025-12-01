@@ -78,37 +78,55 @@ class ExpenseMovemetViewModel(
     }
 
     // ------------------------------------------------------------
-    // 🟣 Filtrar ingresos
+    // 🟣 Filtrar ingresos (CORREGIDO)
     // ------------------------------------------------------------
     fun getIncomes(userId: String, onResult: (List<Movement>) -> Unit) {
         viewModelScope.launch {
             isLoading.value = true
-            val data = repo.getMovementsByType(MovementType.INCOME)
-                .filter { it.userId == userId }
-            onResult(data)
-            isLoading.value = false
+            try {
+                // Usamos la consulta eficiente del repositorio
+                val data = repo.getMovementsByUserAndType(userId, MovementType.INCOME)
+                onResult(data)
+            } catch (e: Exception) {
+                errorMessage.value = e.message
+                onResult(emptyList())
+            } finally {
+                isLoading.value = false
+            }
         }
     }
 
     // ------------------------------------------------------------
-    // 🔴 Filtrar gastos
+    // 🔴 Filtrar gastos (CORREGIDO)
     // ------------------------------------------------------------
     fun getExpenses(userId: String, onResult: (List<Movement>) -> Unit) {
         viewModelScope.launch {
             isLoading.value = true
-            val data = repo.getMovementsByType(MovementType.EXPENSE)
-                .filter { it.userId == userId }
-            onResult(data)
-            isLoading.value = false
+            try {
+                // Usamos la consulta eficiente del repositorio
+                val data = repo.getMovementsByUserAndType(userId, MovementType.EXPENSE)
+                onResult(data)
+            } catch (e: Exception) {
+                errorMessage.value = e.message
+                onResult(emptyList())
+            } finally {
+                isLoading.value = false
+            }
         }
     }
 
     // ------------------------------------------------------------
     // 🟡 Balance total
     // ------------------------------------------------------------
+    // Nota: Esta función sigue calculando el total global de la colección.
+    // Para que sea por usuario, deberías crear 'getTotalBalanceByUser(userId)' en el repo.
     fun getBalance(onResult: (Double) -> Unit) {
         viewModelScope.launch {
-            onResult(repo.getTotalBalance())
+            try {
+                onResult(repo.getTotalBalance())
+            } catch (e: Exception) {
+                errorMessage.value = e.message
+            }
         }
     }
 }

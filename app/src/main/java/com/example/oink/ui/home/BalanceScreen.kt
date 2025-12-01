@@ -30,6 +30,7 @@ import com.example.oink.ui.theme.robotoBoldStyle
 import com.example.oink.ui.theme.robotoExtraBoldStyle
 import com.example.oink.ui.theme.robotoMediumStyle
 import com.example.oink.ui.theme.robotoRegularStyle
+import com.example.oink.viewmodel.AuthViewModel
 import com.example.oink.viewmodel.BalanceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,10 +38,19 @@ import com.example.oink.viewmodel.BalanceViewModel
 fun BalanceScreen(
     viewModel: BalanceViewModel = viewModel(),
     userName: String,
+    authViewModel: AuthViewModel,
     onNavigateToIncome: () -> Unit,
     onNavigateToExpenses: () -> Unit,
     navController: NavController
 ) {
+    val currentUser = authViewModel.currentUser.value
+    val userId = currentUser?.id ?: ""
+
+    LaunchedEffect(userId) {
+        if (userId.isNotBlank()) {
+            viewModel.loadDataForUser(userId)
+        }
+    }
     val movements = viewModel.movements
     val balance = viewModel.totalBalance
     val context = LocalContext.current

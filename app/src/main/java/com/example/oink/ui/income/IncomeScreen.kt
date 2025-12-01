@@ -45,12 +45,14 @@ import com.example.oink.ui.components.ExpenseChart
 import com.example.oink.ui.components.MovementItem
 import com.example.oink.ui.theme.robotoExtraBoldStyle
 import com.example.oink.ui.theme.robotoMediumStyle
+import com.example.oink.viewmodel.AuthViewModel
 import com.example.oink.viewmodel.ExpenseIncomeViewModel
 
 @Composable
 fun IncomeScreen(
     type: MovementType, // INCOME o EXPENSE
     viewModel: ExpenseIncomeViewModel = viewModel(),
+    authViewModel: AuthViewModel,
     onNavigateToExpense: () -> Unit,
     onNavigateToEnter: () -> Unit,
     navController: NavController
@@ -64,9 +66,14 @@ fun IncomeScreen(
         }.getOrNull()
     }
 
+    val currentUser = authViewModel.currentUser.value
+    val userId = currentUser?.id ?: ""
 
-    LaunchedEffect(type) {
-        viewModel.loadMovementsByType(type)
+
+    LaunchedEffect(type, userId) {
+        if (userId.isNotBlank()) {
+            viewModel.loadMovementsByType(type, userId)
+        }
     }
 
     val movements = viewModel.movements

@@ -51,6 +51,15 @@ class MovementRepository(
         return snapshot.toObjects(Movement::class.java)
     }
 
+    suspend fun getMovementsByUserAndType(userId: String, type: MovementType): List<Movement> {
+        val snapshot = movements
+            .whereEqualTo("userId", userId) // 1. Filtro por Usuario
+            .whereEqualTo("type", type.name) // 2. Filtro por Tipo
+            .get()
+            .await()
+        return snapshot.toObjects(Movement::class.java)
+    }
+
     /**
      * Calcula el balance total (Ingresos - Gastos).
      * Nota: Esto descarga todos los movimientos para calcularlo localmente.
