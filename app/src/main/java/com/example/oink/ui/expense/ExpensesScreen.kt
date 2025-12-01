@@ -75,8 +75,10 @@ fun ExpenseScreen(
         }
     }
 
-    val movements = viewModel.movements
-    val t_expense = remember { viewModel.getTotalByType(type) }
+    val movements = viewModel.getMovementsForType(type)
+
+
+    val t_expense = viewModel.getTotalForType(type)
 
     Scaffold(
         bottomBar = { BottomNavBar(navController) },
@@ -193,8 +195,9 @@ fun ExpenseScreen(
                             .padding(end = 12.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+
                         ExpenseChart(
-                            viewModel = viewModel,
+                            movements = movements, // <--- Pasa la lista filtrada (Gastos)
                             scrollOffset = scrollState.value.toFloat()
                         )
                         Spacer(modifier = Modifier.height(12.dp))

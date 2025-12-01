@@ -76,8 +76,9 @@ fun IncomeScreen(
         }
     }
 
-    val movements = viewModel.movements
-    val t_income = remember { viewModel.getTotalByType(type) }
+    val movements = viewModel.getMovementsForType(type)
+    val t_income = viewModel.getTotalForType(type)
+
 
     Scaffold(
         bottomBar = { BottomNavBar(navController) },
@@ -196,7 +197,7 @@ fun IncomeScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         ExpenseChart(
-                            viewModel = viewModel,
+                            movements = movements,
                             scrollOffset = scrollState.value.toFloat()
                         )
                         Spacer(modifier = Modifier.height(12.dp))

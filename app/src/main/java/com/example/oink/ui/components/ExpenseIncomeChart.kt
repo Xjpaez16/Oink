@@ -14,21 +14,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.oink.R
 import com.example.oink.data.model.Movement
 import com.example.oink.data.model.MovementType
-import com.example.oink.viewmodel.ExpenseIncomeViewModel
 
 @Composable
 fun ExpenseChart(
-    viewModel: ExpenseIncomeViewModel = viewModel(),
+    movements: List<Movement>,
     scrollOffset: Float = 0f
 ) {
-    val movements = viewModel.movements
+
     val hasData = movements.isNotEmpty()
 
-    // Igual que tu nuevo componente
     val heightFactor = (1f - (scrollOffset / 800f)).coerceIn(0f, 1f)
 
     Box(
@@ -46,7 +43,7 @@ fun ExpenseChart(
             verticalAlignment = Alignment.Bottom
         ) {
 
-            // ESQUELETO ANTERIOR — pero usando tu lógica actual
+            // Si no hay datos, creamos barras vacías para que se vea el esqueleto
             val bars = if (hasData) movements else List(4) {
                 Movement(
                     id = "dummy",
@@ -56,9 +53,14 @@ fun ExpenseChart(
                 )
             }
 
+            // Evitamos división por cero si el máximo es 0
             val maxAmount = (movements.maxOfOrNull { it.amount } ?: 1).toDouble()
 
-            bars.forEachIndexed { index, movement ->
+            // Mostramos máximo las últimas 5 o 6 barras para que no se amontonen
+            // (Opcional: puedes quitar el takeLast si quieres ver todo comprimido)
+            val displayBars = bars.takeLast(6)
+
+            displayBars.forEachIndexed { index, movement ->
 
                 val amountDouble = movement.amount.toDouble()
 
@@ -70,7 +72,7 @@ fun ExpenseChart(
 
                 Box(
                     modifier = Modifier
-                        .width(55.dp)
+                        .width(55.dp) // Ancho fijo por barra
                         .background(
                             color = if (hasData) Color(0xFF2997FD) else Color.Black.copy(alpha = 0.05f),
                             shape = RoundedCornerShape(20.dp)
@@ -85,14 +87,16 @@ fun ExpenseChart(
                                 .padding(4.dp)
                                 .height(barHeight.dp)
                         ) {
+                            // Ícono
                             Icon(
                                 painter = painterResource(id = getIconForCategory(movement.category)),
                                 contentDescription = movement.category,
-                                tint = Color.Black,
+                                tint = Color.Black, // Ícono negro sobre barra azul
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.height(3.dp))
 
+                            // Texto del monto
                             Text(
                                 text = formatShortAmount(amountDouble),
                                 color = Color.White,
@@ -108,15 +112,16 @@ fun ExpenseChart(
 
         if (!hasData && heightFactor > 0.1f) {
             Text(
-                text = "Nuevo mes, añade un movimiento",
+                text = "Sin movimientos este mes",
                 color = Color.Gray.copy(alpha = heightFactor),
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.align(Alignment.Center)
             )
         }
     }
 }
+
 
 @Composable
 fun formatShortAmount(amount: Double): String {

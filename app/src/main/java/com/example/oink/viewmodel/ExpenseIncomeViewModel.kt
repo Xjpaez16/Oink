@@ -15,36 +15,41 @@ class ExpenseIncomeViewModel : ViewModel() {
 
     private val repository = MovementRepository()
 
-    // Lista de movimientos observables por la UI
-    var movements by mutableStateOf<List<Movement>>(emptyList())
+    // --- CAJA DE GASTOS ---
+    var expenseMovements by mutableStateOf<List<Movement>>(emptyList())
+        private set
+    var expenseTotal by mutableDoubleStateOf(0.0)
         private set
 
-    // Total calculado observable
-    var totalAmount by mutableDoubleStateOf(0.0)
+    // --- CAJA DE INGRESOS ---
+    var incomeMovements by mutableStateOf<List<Movement>>(emptyList())
+        private set
+    var incomeTotal by mutableDoubleStateOf(0.0)
         private set
 
     var isLoading by mutableStateOf(false)
         private set
 
     /**
-     * Carga los movimientos filtrados por tipo (Ingreso o Gasto) desde Firebase.
+     * Carga los movimientos y los guarda en la variable CORRECTA según el tipo.
      */
     fun loadMovementsByType(type: MovementType, userId: String) {
-        // Si el userId viene vacío (no logueado), no hacemos nada o limpiamos
-        if (userId.isBlank()) {
-            movements = emptyList()
-            totalAmount = 0.0
-            return
-        }
+        if (userId.isBlank()) return
 
         viewModelScope.launch {
             isLoading = true
             try {
-                // USAMOS LA NUEVA FUNCIÓN DEL REPOSITORIO
                 val list = repository.getMovementsByUserAndType(userId, type)
+                val total = list.sumOf { it.amount }.toDouble()
 
-                movements = list
-                totalAmount = list.sumOf { it.amount }.toDouble()
+                // AQUÍ ESTÁ EL TRUCO: Guardamos en variables separadas
+                if (type == MovementType.EXPENSE) {
+                    expenseMovements = list
+                    expenseTotal = total
+                } else {
+                    incomeMovements = list
+                    incomeTotal = total
+                }
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -54,18 +59,14 @@ class ExpenseIncomeViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Agrega un movimiento a la base de datos y recarga la lista.
-     */
     fun addMovement(movement: Movement) {
         viewModelScope.launch {
             isLoading = true
             try {
                 repository.addMovement(movement)
-                // Recargamos usando el ID del movimiento que acabamos de guardar
-                val typeEnum = if (movement.type == MovementType.INCOME.name) MovementType.INCOME else MovementType.EXPENSE
 
-                // PASAMOS EL USER ID AQUÍ:
+                // Recargamos solo la caja correspondiente al tipo de movimiento guardado
+                val typeEnum = if (movement.type == MovementType.INCOME.name) MovementType.INCOME else MovementType.EXPENSE
                 loadMovementsByType(typeEnum, movement.userId)
 
             } catch (e: Exception) {
@@ -76,24 +77,14 @@ class ExpenseIncomeViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Limpia la lista en memoria (útil al salir de la pantalla)
-     */
-    fun clear() {
-        movements = emptyList()
-        totalAmount = 0.0
+    // --- HELPERS PARA LA UI ---
+    // Estos métodos ayudan a que la UI sepa qué lista pintar sin saber de lógica interna
+
+    fun getMovementsForType(type: MovementType): List<Movement> {
+        return if (type == MovementType.EXPENSE) expenseMovements else incomeMovements
     }
 
-    /**
-     * Obtiene el total acumulado del tipo especificado.
-     * Nota: Esta función en tu versión anterior era síncrona y llamaba al repo.
-     * Ahora devolvemos el valor calculado en memoria 'totalAmount'
-     * (asegúrate de llamar a loadMovementsByType primero).
-     */
-    fun getTotalByType(type: MovementType): Double {
-        // Si la lista actual coincide con el tipo solicitado, devolvemos el total ya calculado.
-        // De lo contrario, devolvemos 0.0 (o podrías forzar una recarga).
-        val isSameType = movements.isNotEmpty() && movements.first().type == type.name
-        return if (isSameType) totalAmount else 0.0
+    fun getTotalForType(type: MovementType): Double {
+        return if (type == MovementType.EXPENSE) expenseTotal else incomeTotal
     }
 }
