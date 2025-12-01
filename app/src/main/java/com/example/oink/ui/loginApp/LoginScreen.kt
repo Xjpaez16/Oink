@@ -114,9 +114,9 @@ fun LoginScreen(
     // --------------------------------
 
     if (isLoading) {
-        LoadingScreen(animationRes = R.raw.pig_money, message = "Iniciando sesión...")
+        LoadingScreen(animationRes = R.raw.pig_money, message = stringResource(R.string.msg_logging_in))
     } else if (isLoggedIn) {
-        LoadingScreen(animationRes = R.raw.pig_money, message = "¡Bienvenido!")
+        LoadingScreen(animationRes = R.raw.pig_money, message = stringResource(R.string.msg_welcome))
         // Aquí el AppNavGraph detectará el cambio de isLoggedIn y navegará al Home
     } else {
         Box(
@@ -244,7 +244,7 @@ fun LoginScreen(
                     Button(
                         onClick = {
                             LocaleHelper.changeLanguage(context)
-                            Toast.makeText(context, "Idioma cambiado", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.btn_change_language), Toast.LENGTH_SHORT).show()
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -254,7 +254,7 @@ fun LoginScreen(
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
-                            text = "Cambiar idioma",
+                            text = stringResource(R.string.btn_change_language),
                             style = robotoBoldStyle(
                                 fontSize = 16.sp,
                                 color = Color.White

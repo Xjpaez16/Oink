@@ -45,6 +45,8 @@
     <string name="msg_creating_account">Creando tu cuenta...</string>
     <string name="msg_register_success">¡Registro exitoso! Bienvenido a Oink...</string>
     <string name="btn_google">Continuar con Google</string>
+    <string name="msg_logging_in">Iniciando sesión...</string>
+    <string name="msg_welcome">¡Bienvenido!</string>
     <!-- HOME / BALANCE (BalanceScreen.kt) -->
     <string name="greeting_mr">Hola Sr %1$s</string> <!-- %1$s es el nombre del usuario -->
     <string name="balance_subtitle">Echa un vistazo a tus finanzas</string>
