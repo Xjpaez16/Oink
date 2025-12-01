@@ -39,13 +39,15 @@ import com.example.oink.R
 import com.example.oink.ui.components.TextFieldWithLabel
 import com.example.oink.ui.components.LoadingScreen
 import com.example.oink.ui.theme.robotoBoldStyle
+import com.example.oink.utils.LocaleHelper
 import com.example.oink.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel = viewModel(),
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onToggleLanguage: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -236,6 +238,29 @@ fun LoginScreen(
                         onClick = { onGoogleSignInClick() },
                         modifier = Modifier.offset(x = (-10).dp)
                     )
+
+                    // Botón CAMBIAR IDIOMA
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            LocaleHelper.changeLanguage(context)
+                            Toast.makeText(context, "Idioma cambiado", Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(43.dp)
+                            .offset(x = (-10).dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D3685)),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "Cambiar idioma",
+                            style = robotoBoldStyle(
+                                fontSize = 16.sp,
+                                color = Color.White
+                            )
+                        )
+                    }
                 }
             }
         }

@@ -20,7 +20,7 @@ object LocaleHelper {
         // 2. Cambiar al opuesto (Si es Español -> Inglés, Si es Inglés -> Español)
         val newLanguageCode = if (currentLocale.language == "es") "en" else "es"
 
-        // 3. Aplicar cambio
+        // 3. Aplicar cambio globalmente
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.getSystemService(LocaleManager::class.java)
                 .applicationLocales = LocaleList.forLanguageTags(newLanguageCode)
@@ -28,5 +28,15 @@ object LocaleHelper {
             val appLocale = LocaleListCompat.forLanguageTags(newLanguageCode)
             AppCompatDelegate.setApplicationLocales(appLocale)
         }
+    }
+
+    fun getCurrentLanguage(context: Context): String {
+        val currentLocale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            context.resources.configuration.locales[0]
+        } else {
+            @Suppress("DEPRECATION")
+            context.resources.configuration.locale
+        }
+        return currentLocale.language
     }
 }
