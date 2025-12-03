@@ -6,6 +6,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.oink.viewmodel.ReportViewModel
+import com.example.oink.viewmodel.AuthViewModel
+import com.example.oink.viewmodel.ExpenseIncomeViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,12 +23,37 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.oink.R
 import com.example.oink.ui.components.BottomNavBar
+import com.example.oink.ui.registerApp.DatePickerTextField
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun ReportScreen(
     navController: NavController, // 1. Agregamos el parámetro necesario
-    userName: String
+    userName: String,
+    viewModel: ReportViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel()
 ) {
+    // Load data for current user
+    val currentUser = authViewModel.getLoggedUser()
+    val userId = currentUser?.id ?: ""
+
+    LaunchedEffect(userId) {
+        if (userId.isNotBlank()) viewModel.loadReportForUser(userId)
+    }
+
+    // Formatter for the DatePickerTextField (dd/MM/yyyy)
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
+    // Local copies for the read-only text fields
+    var startText by remember { mutableStateOf(viewModel.startDate.format(formatter)) }
+    var endText by remember { mutableStateOf(viewModel.endDate.format(formatter)) }
+
+    // When the ViewModel updates start/end we reflect it locally
+    LaunchedEffect(viewModel.startDate, viewModel.endDate) {
+        startText = viewModel.startDate.format(formatter)
+        endText = viewModel.endDate.format(formatter)
+    }
     Scaffold(
         bottomBar = { BottomNavBar(navController) },
         containerColor = Color.White
@@ -69,49 +98,76 @@ fun ReportScreen(
             ) {
 
                 Column {
-                    Text(text = stringResource(R.string.label_from), fontSize = 12.sp, color = Color.Gray)
-                    Spacer(Modifier.height(6.dp))
-
-                    Box(
-                        modifier = Modifier
-                            .width(140.dp)
-                            .height(38.dp)
-                            .border(2.dp, Color(0xFF1C60E7), RoundedCornerShape(8.dp))
-                            .clip(RoundedCornerShape(8.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "Jun 10, 2025", fontSize = 14.sp, color = Color(0xFF1C60E7))
-                    }
+                    DatePickerTextField(
+                        label = stringResource(R.string.label_from),
+                        value = startText,
+                        onValueChange = { new ->
+                            // parse dd/MM/yyyy
+                            try {
+                                val parsed = LocalDate.parse(new, formatter)
+                                viewModel.updateDateRange(parsed, viewModel.endDate)
+                                viewModel.loadReportForRange(userId, parsed, viewModel.endDate)
+                            } catch (e: Exception) { /* ignore parse errors */ }
+                        }
+                    )
                 }
 
                 Column {
-                    Text(text = stringResource(R.string.label_to), fontSize = 12.sp, color = Color.Gray)
-                    Spacer(Modifier.height(6.dp))
-
-                    Box(
-                        modifier = Modifier
-                            .width(140.dp)
-                            .height(38.dp)
-                            .border(2.dp, Color(0xFF1C60E7), RoundedCornerShape(8.dp))
-                            .clip(RoundedCornerShape(8.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "Agos 10, 2025", fontSize = 14.sp, color = Color(0xFF1C60E7))
-                    }
+                    DatePickerTextField(
+                        label = stringResource(R.string.label_to),
+                        value = endText,
+                        onValueChange = { new ->
+                            try {
+                                val parsed = LocalDate.parse(new, formatter)
+                                viewModel.updateDateRange(viewModel.startDate, parsed)
+                                viewModel.loadReportForRange(userId, viewModel.startDate, parsed)
+                            } catch (e: Exception) { /* ignore parse errors */ }
+                        }
+                    )
                 }
             }
 
             Spacer(Modifier.height(28.dp))
 
-            // GRÁFICA (Placeholder)
+            // Breakdown by category (simple visual)
+            val categories = remember(viewModel.startDate, viewModel.endDate, viewModel.totalExpenses, viewModel.totalIncome) {
+                // We don't have a map in the viewModel for breakdown, so compute from top categories when available.
+                // For simplicity show the two top categories if present.
+                listOfNotNull(viewModel.topExpenseCategory, viewModel.topIncomeCategory)
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(180.dp)
-                    .background(Color(0xFFEAF2FF), RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
+                    .background(Color(0xFFEAF2FF), RoundedCornerShape(12.dp))
+                    .padding(12.dp)
             ) {
-                Text(stringResource(R.string.chart_placeholder_text), color = Color(0xFF1C60E7))
+                if (viewModel.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                } else {
+                    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
+                        Text(text = stringResource(R.string.report_breakdown), color = Color(0xFF1C60E7), fontSize = 14.sp)
+                        Spacer(Modifier.height(8.dp))
+                        if (viewModel.topExpenseCategory == null && viewModel.topIncomeCategory == null) {
+                            Text(stringResource(R.string.report_none), color = Color.Gray)
+                        } else {
+                            if (viewModel.topExpenseCategory != null) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("${stringResource(R.string.report_spent_most)}:", modifier = Modifier.weight(1f))
+                                    Text(viewModel.topExpenseCategory ?: stringResource(R.string.report_none))
+                                }
+                            }
+                            Spacer(Modifier.height(6.dp))
+                            if (viewModel.topIncomeCategory != null) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("${stringResource(R.string.report_earned_most)}:", modifier = Modifier.weight(1f))
+                                    Text(viewModel.topIncomeCategory ?: stringResource(R.string.report_none))
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             Spacer(Modifier.height(40.dp))
@@ -122,7 +178,7 @@ fun ReportScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(stringResource(R.string.report_total_expenses), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                Text("250.000", fontSize = 16.sp)
+                Text("${"%,.0f".format(viewModel.totalExpenses)}", fontSize = 16.sp)
             }
 
             Spacer(Modifier.height(24.dp))
@@ -132,7 +188,7 @@ fun ReportScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(stringResource(R.string.report_total_income), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                Text("500.000", fontSize = 16.sp)
+                Text("${"%,.0f".format(viewModel.totalIncome)}", fontSize = 16.sp)
             }
 
             Spacer(Modifier.height(24.dp))
@@ -147,7 +203,7 @@ fun ReportScreen(
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Spacer(Modifier.width(6.dp))
-                    Text("🏠 Hogar", fontSize = 16.sp)
+                    Text(viewModel.topExpenseCategory ?: stringResource(R.string.report_none), fontSize = 16.sp)
                 }
             }
 
@@ -166,7 +222,7 @@ fun ReportScreen(
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Spacer(Modifier.width(6.dp))
-                    Text("📈 Ventas", fontSize = 16.sp)
+                    Text(viewModel.topIncomeCategory ?: stringResource(R.string.report_none), fontSize = 16.sp)
                 }
             }
         }

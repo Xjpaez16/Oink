@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import com.example.oink.data.model.User
@@ -72,7 +73,7 @@ fun ProfileScreen(
 
             // TÍTULO
             Text(
-                text = "Perfil",
+                text = stringResource(id = com.example.oink.R.string.profile_title),
                 style = robotoBoldStyle(fontSize = 32.sp, color = Color(0xFF0D3685))
             )
             Spacer(modifier = Modifier.height(24.dp))
@@ -93,12 +94,12 @@ fun ProfileScreen(
                         modifier = Modifier.padding(16.dp)
                     ) {
                         Text(
-                            text = "Información Personal",
+                            text = stringResource(id = com.example.oink.R.string.profile_info_title),
                             style = robotoMediumStyle(fontSize = 16.sp, color = Color(0xFF0D3685))
                         )
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        ProfileField(label = "Nombre", value = currentUser.value?.name ?: "No registrado")
+                        ProfileField(label = stringResource(id = com.example.oink.R.string.label_name), value = currentUser.value?.name ?: stringResource(id = com.example.oink.R.string.loading_default))
                     }
                 }
 
@@ -109,20 +110,20 @@ fun ProfileScreen(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        text = "Editar Perfil",
+                        text = stringResource(id = com.example.oink.R.string.btn_edit_profile),
                         style = robotoBoldStyle(fontSize = 16.sp, color = Color.White)
                     )
                 }
             } else {
                 // FORMULARIO DE EDICIÓN
                 Text(
-                    text = "Editar Perfil",
+                    text = stringResource(id = com.example.oink.R.string.edit_profile_title),
                     style = robotoBoldStyle(fontSize = 20.sp, color = Color(0xFF0D3685))
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Nombre",
+                    text = stringResource(id = com.example.oink.R.string.label_name),
                     style = robotoMediumStyle(fontSize = 14.sp, color = Color(0xFF0D3685))
                 )
                 OutlinedTextField(
@@ -131,7 +132,7 @@ fun ProfileScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
-                    placeholder = { Text("Ingresa tu nombre") },
+                    placeholder = { Text(stringResource(id = com.example.oink.R.string.hint_enter_name)) },
                     shape = RoundedCornerShape(8.dp),
                     singleLine = true
                 )
@@ -151,7 +152,7 @@ fun ProfileScreen(
                                     currentUser.value?.let { user ->
                                         val updatedUser = user.copy(name = editName)
                                         viewModel.updateUserProfile(updatedUser)
-                                        Toast.makeText(context, "Perfil actualizado", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(com.example.oink.R.string.msg_register_success), Toast.LENGTH_SHORT).show()
                                         isEditing = false
                                     }
                                 } catch (e: Exception) {
@@ -167,7 +168,7 @@ fun ProfileScreen(
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
-                            text = if (isSaving) "Guardando..." else "Guardar",
+                            text = if (isSaving) stringResource(id = com.example.oink.R.string.loading_default) else stringResource(id = com.example.oink.R.string.btn_save),
                             style = robotoBoldStyle(fontSize = 14.sp, color = Color.White)
                         )
                     }
@@ -180,7 +181,7 @@ fun ProfileScreen(
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
-                            text = "Cancelar",
+                            text = stringResource(id = com.example.oink.R.string.btn_cancel),
                             style = robotoBoldStyle(fontSize = 14.sp, color = Color.White)
                         )
                     }
@@ -193,14 +194,14 @@ fun ProfileScreen(
             Button(
                 onClick = {
                     LocaleHelper.changeLanguage(context)
-                    Toast.makeText(context, "Idioma cambiado (intento)", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(com.example.oink.R.string.btn_change_language), Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D3685)),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
-                    text = "Cambiar idioma",
+                    text = stringResource(id = com.example.oink.R.string.btn_change_language),
                     style = robotoBoldStyle(fontSize = 16.sp, color = Color.White)
                 )
             }

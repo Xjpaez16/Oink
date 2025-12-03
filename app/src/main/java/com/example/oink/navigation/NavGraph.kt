@@ -154,7 +154,7 @@ fun AppNavGraph(navController: NavHostController) {
             composable(NavRoutes.Report.route) {
                 val user = authViewModel.getLoggedUser()
                 if (user != null) {
-                    ReportScreen(navController = navController, userName = user.name)
+                    ReportScreen(navController = navController, userName = user.name, authViewModel = authViewModel)
                 }
             }
 

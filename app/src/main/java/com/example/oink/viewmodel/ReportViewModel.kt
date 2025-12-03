@@ -1,65 +1,137 @@
 package com.example.oink.viewmodel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.example.oink.data.model.MovementType
+import com.example.oink.data.repository.MovementRepository
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 
 class ReportViewModel : ViewModel() {
 
-    private val _startDate = MutableStateFlow(LocalDate.now().minusMonths(1))
-    val startDate: StateFlow<LocalDate> = _startDate
+    private val repository = MovementRepository()
 
-    private val _endDate = MutableStateFlow(LocalDate.now())
-    val endDate: StateFlow<LocalDate> = _endDate
+    var totalExpenses by mutableStateOf(0.0)
+        private set
 
-    private val _totalExpenses = MutableStateFlow(250000)
-    val totalExpenses: StateFlow<Int> = _totalExpenses
+    var totalIncome by mutableStateOf(0.0)
+        private set
 
-    private val _totalIncome = MutableStateFlow(500000)
-    val totalIncome: StateFlow<Int> = _totalIncome
+    var topExpenseCategory by mutableStateOf<String?>(null)
+        private set
 
-    private val _mostSpentCategory = MutableStateFlow("Hogar")
-    val mostSpentCategory: StateFlow<String> = _mostSpentCategory
+    var topIncomeCategory by mutableStateOf<String?>(null)
+        private set
 
-    private val _mostIncomeCategory = MutableStateFlow("Ventas")
-    val mostIncomeCategory: StateFlow<String> = _mostIncomeCategory
+    var isLoading by mutableStateOf(false)
+        private set
 
+    var startDate by mutableStateOf(LocalDate.now().minusMonths(1))
+        private set
 
-    fun updateStartDate(newDate: LocalDate) {
-        _startDate.value = newDate
-        refreshReport()
-    }
+    var endDate by mutableStateOf(LocalDate.now())
+        private set
 
-    fun updateEndDate(newDate: LocalDate) {
-        _endDate.value = newDate
-        refreshReport()
-    }
+    /**
+     * Starts collecting movements for the given user and updates report state.
+     */
+    fun loadReportForUser(userId: String) {
+        if (userId.isBlank()) return
 
-
-    private fun refreshReport() {
         viewModelScope.launch {
+            isLoading = true
+            try {
+                repository.getMovementsByUser(userId).collect { list ->
+                    // Totals
+                    totalExpenses = list
+                        .filter { it.type == MovementType.EXPENSE.name }
+                        .sumOf { it.amount }
+                        .toDouble()
 
-            // Simulación
-            _totalExpenses.value = (100000..500000).random()
-            _totalIncome.value = (200000..700000).random()
+                    totalIncome = list
+                        .filter { it.type == MovementType.INCOME.name }
+                        .sumOf { it.amount }
+                        .toDouble()
 
-            val categories = listOf("Hogar", "Comida", "Transporte", "Salud", "Ocio", "Ventas")
-            _mostSpentCategory.value = categories.random()
-            _mostIncomeCategory.value = categories.random()
+                    // Top categories
+                    val expensesByCat = list
+                        .filter { it.type == MovementType.EXPENSE.name }
+                        .groupBy { it.category }
+                        .mapValues { entry -> entry.value.sumOf { it.amount } }
 
-            // --------------------------------------------------
-            // Firebase
-            //
-            // Firebase.firestore.collection("transacciones")
-            //      .whereGreaterThanOrEqualTo("fecha", startDate.value)
-            //      .whereLessThanOrEqualTo("fecha", endDate.value)
-            //      .get()
-            //      .addOnSuccessListener { ... }
-            //
-            // --------------------------------------------------
+                    topExpenseCategory = expensesByCat.maxByOrNull { it.value }?.key
+
+                    val incomeByCat = list
+                        .filter { it.type == MovementType.INCOME.name }
+                        .groupBy { it.category }
+                        .mapValues { entry -> entry.value.sumOf { it.amount } }
+
+                    topIncomeCategory = incomeByCat.maxByOrNull { it.value }?.key
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    fun updateDateRange(start: LocalDate, end: LocalDate) {
+        startDate = start
+        endDate = end
+    }
+
+    /**
+     * Load report for a specific date range (inclusive). Dates are LocalDate and converted to epoch millis.
+     */
+    fun loadReportForRange(userId: String, start: LocalDate, end: LocalDate) {
+        if (userId.isBlank()) return
+
+        viewModelScope.launch {
+            isLoading = true
+            try {
+                val zone = ZoneId.systemDefault()
+                val startMillis = start.atStartOfDay(zone).toInstant().toEpochMilli()
+                // end of day for end date
+                val endMillis = end.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli() - 1
+
+                val list = repository.getMovementsByDateRange(userId, startMillis, endMillis)
+
+                totalExpenses = list
+                    .filter { it.type == MovementType.EXPENSE.name }
+                    .sumOf { it.amount }
+                    .toDouble()
+
+                totalIncome = list
+                    .filter { it.type == MovementType.INCOME.name }
+                    .sumOf { it.amount }
+                    .toDouble()
+
+                val expensesByCat = list
+                    .filter { it.type == MovementType.EXPENSE.name }
+                    .groupBy { it.category }
+                    .mapValues { entry -> entry.value.sumOf { it.amount } }
+
+                topExpenseCategory = expensesByCat.maxByOrNull { it.value }?.key
+
+                val incomeByCat = list
+                    .filter { it.type == MovementType.INCOME.name }
+                    .groupBy { it.category }
+                    .mapValues { entry -> entry.value.sumOf { it.amount } }
+
+                topIncomeCategory = incomeByCat.maxByOrNull { it.value }?.key
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                isLoading = false
+            }
         }
     }
 }

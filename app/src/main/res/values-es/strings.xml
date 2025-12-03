@@ -106,6 +106,8 @@
     <string name="report_total_income">Ingresos totales :</string>
     <string name="report_spent_most">Gastaste más en:</string>
     <string name="report_earned_most">Generaste más ingresos en:</string>
+    <string name="report_none">Ninguna</string>
+    <string name="report_breakdown">Desglose por categoría</string>
 
     <!-- CALENDARIO -->
     <string name="date_selected_label">Fecha seleccionada: %1$s</string>
