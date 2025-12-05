@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,8 +25,22 @@ fun ExpenseChart(
     scrollOffset: Float = 0f
 ) {
 
-    val hasData = movements.isNotEmpty()
+    val groupedMovements = remember(movements) {
+        movements
+            .groupBy { it.category }
+            .map { (category, movs) ->
 
+                Movement(
+                    id = "group_$category",
+                    amount = movs.sumOf { it.amount },
+                    category = category,
+                    type = movs.first().type
+                )
+            }
+
+    }
+
+    val hasData = groupedMovements.isNotEmpty()
     val heightFactor = (1f - (scrollOffset / 800f)).coerceIn(0f, 1f)
 
     Box(
@@ -43,8 +58,8 @@ fun ExpenseChart(
             verticalAlignment = Alignment.Bottom
         ) {
 
-            // Si no hay datos, creamos barras vacías para que se vea el esqueleto
-            val bars = if (hasData) movements else List(4) {
+            // Si no hay datos, mostramos barras vacías
+            val bars = if (hasData) groupedMovements else List(4) {
                 Movement(
                     id = "dummy",
                     amount = 0,
@@ -53,11 +68,10 @@ fun ExpenseChart(
                 )
             }
 
-            // Evitamos división por cero si el máximo es 0
-            val maxAmount = (movements.maxOfOrNull { it.amount } ?: 1).toDouble()
 
-            // Mostramos máximo las últimas 5 o 6 barras para que no se amontonen
-            // (Opcional: puedes quitar el takeLast si quieres ver todo comprimido)
+            val maxAmount = (groupedMovements.maxOfOrNull { it.amount } ?: 1).toDouble()
+
+
             val displayBars = bars.takeLast(6)
 
             displayBars.forEachIndexed { index, movement ->
@@ -65,6 +79,7 @@ fun ExpenseChart(
                 val amountDouble = movement.amount.toDouble()
 
                 val baseHeight = if (hasData) {
+
                     (amountDouble / maxAmount * 180).coerceAtLeast(50.0)
                 } else listOf(180.0, 120.0, 75.0)[index % 3]
 
@@ -72,7 +87,7 @@ fun ExpenseChart(
 
                 Box(
                     modifier = Modifier
-                        .width(55.dp) // Ancho fijo por barra
+                        .width(55.dp)
                         .background(
                             color = if (hasData) Color(0xFF2997FD) else Color.Black.copy(alpha = 0.05f),
                             shape = RoundedCornerShape(20.dp)
@@ -87,16 +102,16 @@ fun ExpenseChart(
                                 .padding(4.dp)
                                 .height(barHeight.dp)
                         ) {
-                            // Ícono
+                            // Ícono de la categoría
                             Icon(
                                 painter = painterResource(id = getIconForCategory(movement.category)),
                                 contentDescription = movement.category,
-                                tint = Color.Black, // Ícono negro sobre barra azul
+                                tint = Color.Black,
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.height(3.dp))
 
-                            // Texto del monto
+                            // Texto del monto total de la categoría
                             Text(
                                 text = formatShortAmount(amountDouble),
                                 color = Color.White,
