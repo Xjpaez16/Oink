@@ -19,25 +19,39 @@ import com.example.oink.R
 import com.example.oink.data.model.Movement
 import com.example.oink.data.model.MovementType
 
+private fun getCategoryKey(categoryName: String): String {
+    return when (categoryName.lowercase()) {
+        "transporte", "transport" -> "TRANSPORT"
+        "hogar", "home" -> "HOME"
+        "personal" -> "PERSONAL"
+        "regalos", "gifts" -> "GIFTS"
+        "lujos", "luxury" -> "LUXURY"
+        "comida", "food" -> "FOOD"
+        "membresias", "membership" -> "MEMBERSHIP"
+        "vehiculos", "vehicles" -> "VEHICLES"
+        "trabajo", "work" -> "WORK"
+        "banco", "bank" -> "BANK"
+        else -> categoryName.uppercase()
+    }
+}
+
 @Composable
 fun ExpenseChart(
     movements: List<Movement>,
     scrollOffset: Float = 0f
 ) {
-
     val groupedMovements = remember(movements) {
         movements
-            .groupBy { it.category }
-            .map { (category, movs) ->
-
+            .groupBy { getCategoryKey(it.category) }
+            .map { (key, movs) ->
+                val representativeMovement = movs.first()
                 Movement(
-                    id = "group_$category",
+                    id = "group_$key",
                     amount = movs.sumOf { it.amount },
-                    category = category,
-                    type = movs.first().type
+                    category = representativeMovement.category,
+                    type = representativeMovement.type
                 )
             }
-
     }
 
     val hasData = groupedMovements.isNotEmpty()
@@ -58,7 +72,6 @@ fun ExpenseChart(
             verticalAlignment = Alignment.Bottom
         ) {
 
-            // Si no hay datos, mostramos barras vacías
             val bars = if (hasData) groupedMovements else List(4) {
                 Movement(
                     id = "dummy",
@@ -68,18 +81,12 @@ fun ExpenseChart(
                 )
             }
 
-
             val maxAmount = (groupedMovements.maxOfOrNull { it.amount } ?: 1).toDouble()
-
-
             val displayBars = bars.takeLast(6)
 
             displayBars.forEachIndexed { index, movement ->
-
                 val amountDouble = movement.amount.toDouble()
-
                 val baseHeight = if (hasData) {
-
                     (amountDouble / maxAmount * 180).coerceAtLeast(50.0)
                 } else listOf(180.0, 120.0, 75.0)[index % 3]
 
@@ -102,7 +109,6 @@ fun ExpenseChart(
                                 .padding(4.dp)
                                 .height(barHeight.dp)
                         ) {
-                            // Ícono de la categoría
                             Icon(
                                 painter = painterResource(id = getIconForCategory(movement.category)),
                                 contentDescription = movement.category,
@@ -110,8 +116,6 @@ fun ExpenseChart(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.height(3.dp))
-
-                            // Texto del monto total de la categoría
                             Text(
                                 text = formatShortAmount(amountDouble),
                                 color = Color.White,
@@ -137,7 +141,6 @@ fun ExpenseChart(
     }
 }
 
-
 @Composable
 fun formatShortAmount(amount: Double): String {
     return when {
@@ -150,17 +153,17 @@ fun formatShortAmount(amount: Double): String {
 fun Double.format(decimals: Int): String = "%.${decimals}f".format(this)
 
 fun getIconForCategory(categoryName: String): Int {
-    return when (categoryName) {
-        "Transporte", "Transport" -> R.drawable.directions_bus
-        "Hogar", "Home" -> R.drawable.house_2
-        "Personal" -> R.drawable.man_hair_beauty_salon_3
-        "Regalos", "Gifts" -> R.drawable.gift_1
-        "Lujos", "Luxury" -> R.drawable.group
-        "Comida", "Food" -> R.drawable.fast_food_french_1
-        "Membresias", "Membership" -> R.drawable.netflix_1
-        "Vehiculos", "Vehicles" -> R.drawable.bike_1
-        "Trabajo", "Work" -> R.drawable.work_2
-        "Banco", "Bank" -> R.drawable.bank_bitcoin_svgrepo_com
+    return when (getCategoryKey(categoryName)) {
+        "TRANSPORT" -> R.drawable.directions_bus
+        "HOME" -> R.drawable.house_2
+        "PERSONAL" -> R.drawable.man_hair_beauty_salon_3
+        "GIFTS" -> R.drawable.gift_1
+        "LUXURY" -> R.drawable.group
+        "FOOD" -> R.drawable.fast_food_french_1
+        "MEMBERSHIP" -> R.drawable.netflix_1
+        "VEHICLES" -> R.drawable.bike_1
+        "WORK" -> R.drawable.work_2
+        "BANK" -> R.drawable.bank_bitcoin_svgrepo_com
         else -> R.drawable.house_2
     }
 }
