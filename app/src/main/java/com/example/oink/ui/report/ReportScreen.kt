@@ -1,15 +1,21 @@
 package com.example.oink.ui.report
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.oink.viewmodel.ReportViewModel
 import com.example.oink.viewmodel.AuthViewModel
-import com.example.oink.viewmodel.ExpenseIncomeViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,42 +33,56 @@ import com.example.oink.ui.registerApp.DatePickerTextField
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+// --- IMPORTS PARA TU COMPONENTE PERSONALIZADO ---
+import com.example.oink.ui.components.ExpenseChart
+import com.example.oink.data.model.Movement
+import com.example.oink.data.model.MovementType
+
+@OptIn(ExperimentalFoundationApi::class) // Necesario para el HorizontalPager
 @Composable
 fun ReportScreen(
-    navController: NavController, // 1. Agregamos el parámetro necesario
+    navController: NavController,
     userName: String,
     viewModel: ReportViewModel = viewModel(),
     authViewModel: AuthViewModel = viewModel()
 ) {
-    // Load data for current user
+    // Obtener usuario actual
     val currentUser = authViewModel.getLoggedUser()
     val userId = currentUser?.id ?: ""
 
+    // Carga inicial con el rango por defecto
     LaunchedEffect(userId) {
-        if (userId.isNotBlank()) viewModel.loadReportForUser(userId)
+        if (userId.isNotBlank()) {
+            viewModel.loadReportForRange(userId, viewModel.startDate, viewModel.endDate)
+        }
     }
 
-    // Formatter for the DatePickerTextField (dd/MM/yyyy)
+    // Formateador para los campos de fecha
     val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
-    // Local copies for the read-only text fields
+    // Copias locales para los campos de texto
     var startText by remember { mutableStateOf(viewModel.startDate.format(formatter)) }
     var endText by remember { mutableStateOf(viewModel.endDate.format(formatter)) }
 
-    // When the ViewModel updates start/end we reflect it locally
+    // Sincronizar texto si el ViewModel cambia las fechas
     LaunchedEffect(viewModel.startDate, viewModel.endDate) {
         startText = viewModel.startDate.format(formatter)
         endText = viewModel.endDate.format(formatter)
     }
+
+    // ESTADO DEL CARRUSEL (2 Páginas: Gastos e Ingresos)
+    val pagerState = rememberPagerState(pageCount = { 2 })
+
     Scaffold(
         bottomBar = { BottomNavBar(navController) },
         containerColor = Color.White
-    ) { innerPadding -> // 2. Recibimos el padding del Scaffold
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding) // 3. Aplicamos el padding para evitar que la navbar tape el contenido
+                .padding(innerPadding)
                 .padding(horizontal = 24.dp, vertical = 16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
 
             Text(
@@ -91,88 +111,138 @@ fun ReportScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // Fechas (Desde - Hasta)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            // Sección de selectores de Fecha
+            Column(modifier = Modifier.fillMaxWidth()) {
+                DatePickerTextField(
+                    label = stringResource(R.string.label_from),
+                    value = startText,
+                    onValueChange = { new ->
+                        try {
+                            val parsed = LocalDate.parse(new, formatter)
+                            viewModel.updateDateRange(parsed, viewModel.endDate)
+                            viewModel.loadReportForRange(userId, parsed, viewModel.endDate)
+                        } catch (e: Exception) { /* ignorar errores de parseo */ }
+                    }
+                )
 
-                Column {
-                    DatePickerTextField(
-                        label = stringResource(R.string.label_from),
-                        value = startText,
-                        onValueChange = { new ->
-                            // parse dd/MM/yyyy
-                            try {
-                                val parsed = LocalDate.parse(new, formatter)
-                                viewModel.updateDateRange(parsed, viewModel.endDate)
-                                viewModel.loadReportForRange(userId, parsed, viewModel.endDate)
-                            } catch (e: Exception) { /* ignore parse errors */ }
-                        }
-                    )
-                }
+                Spacer(Modifier.height(8.dp))
 
-                Column {
-                    DatePickerTextField(
-                        label = stringResource(R.string.label_to),
-                        value = endText,
-                        onValueChange = { new ->
-                            try {
-                                val parsed = LocalDate.parse(new, formatter)
-                                viewModel.updateDateRange(viewModel.startDate, parsed)
-                                viewModel.loadReportForRange(userId, viewModel.startDate, parsed)
-                            } catch (e: Exception) { /* ignore parse errors */ }
-                        }
-                    )
-                }
+                DatePickerTextField(
+                    label = stringResource(R.string.label_to),
+                    value = endText,
+                    onValueChange = { new ->
+                        try {
+                            val parsed = LocalDate.parse(new, formatter)
+                            viewModel.updateDateRange(viewModel.startDate, parsed)
+                            viewModel.loadReportForRange(userId, viewModel.startDate, parsed)
+                        } catch (e: Exception) { /* ignorar errores de parseo */ }
+                    }
+                )
             }
 
             Spacer(Modifier.height(28.dp))
 
-            // Breakdown by category (simple visual)
-            val categories = remember(viewModel.startDate, viewModel.endDate, viewModel.totalExpenses, viewModel.totalIncome) {
-                // We don't have a map in the viewModel for breakdown, so compute from top categories when available.
-                // For simplicity show the two top categories if present.
-                listOfNotNull(viewModel.topExpenseCategory, viewModel.topIncomeCategory)
-            }
-
+            // ============================================================
+            // CARRUSEL (PAGER) DE GRÁFICAS
+            // ============================================================
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .height(400.dp) // Altura aumentada para incluir los puntitos
                     .background(Color(0xFFEAF2FF), RoundedCornerShape(12.dp))
-                    .padding(12.dp)
+                    .padding(16.dp)
             ) {
                 if (viewModel.isLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                } else if (!viewModel.hasResults) {
+                    Text(
+                        text = stringResource(R.string.report_no_data_range),
+                        modifier = Modifier.align(Alignment.Center),
+                        color = Color.Gray
+                    )
                 } else {
-                    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
-                        Text(text = stringResource(R.string.report_breakdown), color = Color(0xFF1C60E7), fontSize = 14.sp)
-                        Spacer(Modifier.height(8.dp))
-                        if (viewModel.topExpenseCategory == null && viewModel.topIncomeCategory == null) {
-                            Text(stringResource(R.string.report_none), color = Color.Gray)
-                        } else {
-                            if (viewModel.topExpenseCategory != null) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text("${stringResource(R.string.report_spent_most)}:", modifier = Modifier.weight(1f))
-                                    Text(viewModel.topExpenseCategory ?: stringResource(R.string.report_none))
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+                        // Componente de Carrusel Deslizable
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                        ) { page ->
+                            // Lógica para diferenciar las páginas
+                            val isExpensePage = page == 0
+
+                            // Configuración dinámica según la página
+                            val title = if (isExpensePage) "Gastos por Categoría" else "Ingresos por Categoría"
+                            val chartData = if (isExpensePage) viewModel.categoryTotals else viewModel.incomeTotals
+                            // Color azul normal para gastos, Azul oscuro para ingresos
+                            val titleColor = if (isExpensePage) Color(0xFF1C60E7) else Color(0xFF0D47A1)
+
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = title,
+                                    color = titleColor,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+
+                                if (chartData.isEmpty()) {
+                                    Box(
+                                        modifier = Modifier.weight(1f),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = if (isExpensePage) "Sin gastos registrados" else "Sin ingresos registrados",
+                                            color = Color.Gray
+                                        )
+                                    }
+                                } else {
+                                    // Renderizamos la gráfica con los datos correspondientes
+                                    ExpenseChart(
+                                        movements = chartData,
+                                        scrollOffset = 0f
+                                    )
                                 }
                             }
-                            Spacer(Modifier.height(6.dp))
-                            if (viewModel.topIncomeCategory != null) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text("${stringResource(R.string.report_earned_most)}:", modifier = Modifier.weight(1f))
-                                    Text(viewModel.topIncomeCategory ?: stringResource(R.string.report_none))
-                                }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Indicadores de página (Puntitos)
+                        Row(
+                            Modifier
+                                .wrapContentHeight()
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            repeat(pagerState.pageCount) { iteration ->
+                                val color = if (pagerState.currentPage == iteration) Color.DarkGray else Color.LightGray.copy(alpha = 0.5f)
+                                Box(
+                                    modifier = Modifier
+                                        .padding(4.dp)
+                                        .clip(CircleShape)
+                                        .background(color)
+                                        .size(8.dp) // Tamaño del puntito
+                                )
                             }
                         }
                     }
                 }
             }
+            // ============================================================
 
             Spacer(Modifier.height(40.dp))
 
-            // Resumen de Totales
+            // Resumen de Totales Numéricos
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -232,7 +302,6 @@ fun ReportScreen(
 @Preview(showBackground = true)
 @Composable
 fun FinanceReportScreenPreview() {
-    // Creamos un navController falso para la previsualización
     val navController = rememberNavController()
-    ReportScreen(navController = navController, userName = "Yorch")
+    ReportScreen(navController = navController, userName = "Usuario")
 }

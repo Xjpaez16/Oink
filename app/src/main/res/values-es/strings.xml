@@ -108,6 +108,7 @@
     <string name="report_earned_most">Generaste más ingresos en:</string>
     <string name="report_none">Ninguna</string>
     <string name="report_breakdown">Desglose por categoría</string>
+    <string name="report_no_data_range">No hay movimientos en este rango de fechas</string>
 
     <!-- CALENDARIO -->
     <string name="date_selected_label">Fecha seleccionada: %1$s</string>
