@@ -231,7 +231,10 @@ fun AppNavGraph(navController : NavHostController ){
         }
 
         composable(NavRoutes.Consult_movs.route) {
-            Consult_movs_view(navController = navController)
+            Consult_movs_view(
+                navController = navController,
+                authViewModel = authViewModel
+            )
         }
 
     }
