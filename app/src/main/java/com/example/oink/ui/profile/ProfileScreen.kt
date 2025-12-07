@@ -24,6 +24,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
 import com.example.oink.data.model.User
 import com.example.oink.ui.theme.robotoBoldStyle
 import com.example.oink.ui.theme.robotoMediumStyle
@@ -41,10 +45,24 @@ fun ProfileScreen(
     val currentUser = viewModel.currentUser
     val scope = rememberCoroutineScope()
 
-    // Estados editable
+    // Estados
+    val isLoggedIn by viewModel.isLoggedIn
+
+    // ---------------------------------------------------------
+    // CORRECCIÓN CRÍTICA: DETECCIÓN DE LOGOUT
+    // Este LaunchedEffect es el ÚNICO responsable de navegar
+    // cuando la sesión se cierra.
+    // ---------------------------------------------------------
+    LaunchedEffect(isLoggedIn) {
+        if (!isLoggedIn) {
+            onClose()
+        }
+    }
+
     var editName by remember { mutableStateOf("") }
     var isEditing by remember { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     // Observa el usuario en tiempo real cuando tenemos userId
     LaunchedEffect(currentUser.value?.id) {
@@ -60,6 +78,37 @@ fun ProfileScreen(
         }
     }
 
+    // DIÁLOGO DE CONFIRMACIÓN
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text(stringResource(id = com.example.oink.R.string.logout_title)) },
+            text = { Text(stringResource(id = com.example.oink.R.string.logout_message)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showLogoutDialog = false
+                        // CORRECCIÓN: Solo llamamos al ViewModel.
+                        // El LaunchedEffect de arriba se encargará de llamar a onClose()
+                        // automáticamente cuando isLoggedIn cambie a false.
+                        viewModel.logout()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                ) {
+                    Text(stringResource(id = com.example.oink.R.string.logout_confirm), color = Color.White)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showLogoutDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D3685))
+                ) {
+                    Text(stringResource(id = com.example.oink.R.string.logout_cancel), color = Color.White)
+                }
+            }
+        )
+    }
+
     Surface(modifier = Modifier.fillMaxSize(), color = Color.White) {
         Column(
             modifier = Modifier
@@ -71,14 +120,48 @@ fun ProfileScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            // TÍTULO
-            Text(
-                text = stringResource(id = com.example.oink.R.string.profile_title),
-                style = robotoBoldStyle(fontSize = 32.sp, color = Color(0xFF0D3685))
-            )
-            Spacer(modifier = Modifier.height(24.dp))
+            // HEADER CON AVATAR Y NOMBRE
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                // Avatar con iniciales
+                Surface(
+                    modifier = Modifier.size(60.dp),
+                    shape = RoundedCornerShape(50),
+                    color = Color(0xFF2997FD)
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Text(
+                            text = (currentUser.value?.name?.firstOrNull()?.uppercaseChar() ?: "U").toString(),
+                            style = robotoBoldStyle(fontSize = 26.sp, color = Color.White)
+                        )
+                    }
+                }
 
-            // MOSTRAR DATOS DEL USUARIO
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = currentUser.value?.name ?: stringResource(id = com.example.oink.R.string.loading_default),
+                        style = robotoBoldStyle(fontSize = 20.sp, color = Color(0xFF0D3685))
+                    )
+                    Text(
+                        text = currentUser.value?.email ?: "",
+                        style = robotoRegularStyle(fontSize = 11.sp, color = Color(0xFF7A8A9E))
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // MOSTRAR DATOS DEL USUARIO O FORMULARIO
             if (!isEditing) {
                 // Card con datos actuales
                 androidx.compose.material3.Card(
@@ -99,7 +182,10 @@ fun ProfileScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        ProfileField(label = stringResource(id = com.example.oink.R.string.label_name), value = currentUser.value?.name ?: stringResource(id = com.example.oink.R.string.loading_default))
+                        ProfileField(
+                            label = stringResource(id = com.example.oink.R.string.label_name),
+                            value = currentUser.value?.name ?: stringResource(id = com.example.oink.R.string.loading_default)
+                        )
                     }
                 }
 
@@ -111,6 +197,45 @@ fun ProfileScreen(
                 ) {
                     Text(
                         text = stringResource(id = com.example.oink.R.string.btn_edit_profile),
+                        style = robotoBoldStyle(fontSize = 16.sp, color = Color.White)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Button(
+                    onClick = {
+                        LocaleHelper.changeLanguage(context)
+                        Toast.makeText(context, context.getString(com.example.oink.R.string.btn_change_language), Toast.LENGTH_SHORT).show()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D3685)),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = stringResource(id = com.example.oink.R.string.btn_change_language),
+                        style = robotoBoldStyle(fontSize = 16.sp, color = Color.White)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Button(
+                    onClick = { showLogoutDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ExitToApp,
+                        contentDescription = "Logout",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(18.dp)
+                            .padding(end = 6.dp)
+                    )
+                    Text(
+                        text = stringResource(id = com.example.oink.R.string.btn_logout),
                         style = robotoBoldStyle(fontSize = 16.sp, color = Color.White)
                     )
                 }
@@ -189,22 +314,6 @@ fun ProfileScreen(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-
-            // BOTÓN DE IDIOMA AL FINAL (llama al helper, no fuerza recreación)
-            Button(
-                onClick = {
-                    LocaleHelper.changeLanguage(context)
-                    Toast.makeText(context, context.getString(com.example.oink.R.string.btn_change_language), Toast.LENGTH_SHORT).show()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D3685)),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(
-                    text = stringResource(id = com.example.oink.R.string.btn_change_language),
-                    style = robotoBoldStyle(fontSize = 16.sp, color = Color.White)
-                )
-            }
         }
     }
 }

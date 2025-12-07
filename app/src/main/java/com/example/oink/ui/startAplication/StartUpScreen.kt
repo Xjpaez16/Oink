@@ -1,6 +1,7 @@
 package com.example.oink.ui.startAplication
 
 import android.graphics.BitmapFactory
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.example.oink.R
 import com.example.oink.ui.theme.robotoBoldStyle
 import com.example.oink.ui.theme.robotoSemiBoldStyle
+import com.example.oink.utils.LocaleHelper
 
 
 @Composable
@@ -67,7 +69,10 @@ fun StartUpScreen(
                         contentDescription = stringResource(R.string.desc_translate),
                         modifier = Modifier
                             .size(28.dp)
-                            .clickable { onLanguageClick() }
+                            .clickable { 
+                                LocaleHelper.changeLanguage(context)
+                                Toast.makeText(context, context.getString(R.string.btn_change_language), Toast.LENGTH_SHORT).show()
+                            }
                     )
                 }
             }

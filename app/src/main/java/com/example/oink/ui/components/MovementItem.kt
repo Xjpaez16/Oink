@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -19,6 +20,7 @@ import com.example.oink.data.model.MovementType
 import com.example.oink.ui.theme.robotoBoldStyle
 import com.example.oink.ui.theme.robotoMediumStyle
 import com.example.oink.ui.theme.robotoRegularStyle
+import com.example.oink.utils.LocaleHelper
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -27,8 +29,11 @@ fun MovementItem(
     movement: Movement,
     onMovementClick: ((Movement) -> Unit)? = null // Callback opcional para el click
 ) {
-
+    val context = LocalContext.current
     val isIncome = movement.type == MovementType.INCOME.name
+    
+    // Traducir categoría al idioma actual
+    val translatedCategory = translateCategory(movement.category, context)
 
     Row(
         modifier = Modifier
@@ -65,7 +70,7 @@ fun MovementItem(
 
             Column {
                 Text(
-                    text = movement.category,
+                    text = translatedCategory,
                     style = robotoRegularStyle(
                         fontSize = 12.sp,
                         color = Color.Gray
@@ -132,5 +137,43 @@ fun getIconForCategoryItem(categoryName: String): Int {
         "Trabajo", "Work" -> com.example.oink.R.drawable.work_2
         "Banco", "Bank" -> com.example.oink.R.drawable.bank_bitcoin_svgrepo_com
         else -> com.example.oink.R.drawable.house_2
+    }
+}
+
+// Función para traducir categorías al idioma actual
+fun translateCategory(category: String, context: android.content.Context): String {
+    val currentLanguage = LocaleHelper.getCurrentLanguage(context)
+    
+    return when (category) {
+        "Transporte" -> if (currentLanguage == "en") "Transport" else "Transporte"
+        "Transport" -> if (currentLanguage == "en") "Transport" else "Transporte"
+        
+        "Hogar" -> if (currentLanguage == "en") "Home" else "Hogar"
+        "Home" -> if (currentLanguage == "en") "Home" else "Hogar"
+        
+        "Personal" -> "Personal"
+        
+        "Regalos" -> if (currentLanguage == "en") "Gifts" else "Regalos"
+        "Gifts" -> if (currentLanguage == "en") "Gifts" else "Regalos"
+        
+        "Lujos" -> if (currentLanguage == "en") "Luxury" else "Lujos"
+        "Luxury" -> if (currentLanguage == "en") "Luxury" else "Lujos"
+        
+        "Comida" -> if (currentLanguage == "en") "Food" else "Comida"
+        "Food" -> if (currentLanguage == "en") "Food" else "Comida"
+        
+        "Membresias" -> if (currentLanguage == "en") "Membership" else "Membresias"
+        "Membership" -> if (currentLanguage == "en") "Membership" else "Membresias"
+        
+        "Vehiculos" -> if (currentLanguage == "en") "Vehicles" else "Vehiculos"
+        "Vehicles" -> if (currentLanguage == "en") "Vehicles" else "Vehiculos"
+        
+        "Trabajo" -> if (currentLanguage == "en") "Work" else "Trabajo"
+        "Work" -> if (currentLanguage == "en") "Work" else "Trabajo"
+        
+        "Banco" -> if (currentLanguage == "en") "Bank" else "Banco"
+        "Bank" -> if (currentLanguage == "en") "Bank" else "Banco"
+        
+        else -> category
     }
 }

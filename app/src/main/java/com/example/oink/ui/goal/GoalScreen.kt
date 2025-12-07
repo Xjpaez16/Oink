@@ -12,6 +12,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import com.example.oink.ui.components.NotificationBubble
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -39,11 +42,32 @@ fun GoalScreen(
 ) {
     var goalName by remember { mutableStateOf("") }
     var goalPrice by remember { mutableStateOf("") }
+    var showNotification by remember { mutableStateOf(false) }
+    var notifyText by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
 
     // 2. Observamos los estados del ViewModel
     val message by viewModel.messageState
     val isLoading by viewModel.isLoading
     val currentUser = authViewModel.currentUser.value // Obtenemos el usuario
+
+    val notificationMessage = stringResource(R.string.notification_goal_created)
+
+    LaunchedEffect(message) {
+        message?.let { msg ->
+            if (msg.contains("éxito", ignoreCase = true)) {
+                notifyText = notificationMessage
+                showNotification = true
+            }
+        }
+    }
+
+    LaunchedEffect(showNotification) {
+        if (showNotification) {
+            delay(2500)
+            showNotification = false
+        }
+    }
 
     // Si está cargando, mostramos loader
     if (isLoading) {
@@ -52,17 +76,18 @@ fun GoalScreen(
         }
     }
 
-    Scaffold(
-        bottomBar = { BottomNavBar(navController) },
-        containerColor = Color(0xFFF8FAFF)
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            bottomBar = { BottomNavBar(navController) },
+            containerColor = Color(0xFFF8FAFF)
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -185,5 +210,8 @@ fun GoalScreen(
                 }
             }
         }
+        }
+
+        NotificationBubble(visible = showNotification, message = notifyText)
     }
 }
