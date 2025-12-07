@@ -50,7 +50,7 @@ class ConsultMovsViewModel : ViewModel() {
 
             try {
 
-                val result = repository.getMovementsByDateRange(
+                val result = repository.getMovementsByDate(
                     userId,
                     startOfDay.time,
                     endOfDay.time

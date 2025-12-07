@@ -94,7 +94,21 @@ class MovementRepository(
         movements.document(id).delete().await()
     }
 
-    suspend fun getMovementsByDateRange(userId: String, start: Date, end: Date): List<Movement> {
+    suspend fun getMovementsByDateRange(userId: String, start: Long, end: Long): List<Movement> {
+
+        val startDate = Date(start)
+        val endDate = Date(end)
+
+        val query = movements
+            .whereEqualTo("userId", userId)
+            .whereGreaterThanOrEqualTo("date", startDate)
+            .whereLessThanOrEqualTo("date", endDate)
+            .get().await()
+
+        return query.toObjects(Movement::class.java)
+    }
+
+    suspend fun getMovementsByDate(userId: String, start: Date, end: Date): List<Movement> {
         val query = movements
             .whereEqualTo("userId", userId)
             .whereGreaterThanOrEqualTo("date", start)
