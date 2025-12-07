@@ -17,5 +17,6 @@ sealed class NavRoutes(val route : String){
 
     object DepositGoal : NavRoutes("deposit_goal_screen/{goalId}/{goalName}")
 
+    object Profile : NavRoutes("profile")
 
 }

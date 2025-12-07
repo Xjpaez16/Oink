@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Oink</string>
 
@@ -48,7 +49,7 @@
     <string name="msg_logging_in">Iniciando sesión...</string>
     <string name="msg_welcome">¡Bienvenido!</string>
     <!-- HOME / BALANCE (BalanceScreen.kt) -->
-    <string name="greeting_mr">Hola Sr %1$s</string> <!-- %1$s es el nombre del usuario -->
+    <string name="greeting_mr">Hola Sr %1$s</string>
     <string name="balance_subtitle">Echa un vistazo a tus finanzas</string>
     <string name="balance_label">Balance</string>
     <string name="btn_minus_expenses">− Gastos</string>
@@ -111,7 +112,7 @@
 
     <!-- CALENDARIO -->
     <string name="date_selected_label">Fecha seleccionada: %1$s</string>
-    
+
     <!-- PROFILE -->
     <string name="profile_title">Perfil</string>
     <string name="profile_info_title">Información Personal</string>

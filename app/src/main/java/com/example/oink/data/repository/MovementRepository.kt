@@ -99,10 +99,15 @@ class MovementRepository(
     }
 
     suspend fun getMovementsByDateRange(userId: String, start: Long, end: Long): List<Movement> {
+        // Firestore stores dates as Timestamp/Date objects. Convert epoch millis to Date
+        // so comparisons use the same types and the queries work as expected.
+        val startDate = java.util.Date(start)
+        val endDate = java.util.Date(end)
+
         val query = movements
             .whereEqualTo("userId", userId)
-            .whereGreaterThanOrEqualTo("date", start)
-            .whereLessThanOrEqualTo("date", end)
+            .whereGreaterThanOrEqualTo("date", startDate)
+            .whereLessThanOrEqualTo("date", endDate)
             .get().await()
 
         return query.toObjects(Movement::class.java)

@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.oink.data.model.User
 import com.example.oink.data.repository.UserRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class AuthViewModel : ViewModel() {
@@ -43,8 +45,8 @@ class AuthViewModel : ViewModel() {
                 // Eliminamos el delay artificial
                 // delay(1000)
 
-                // 2. Intentar registrar en Firebase
-                val user = userRepository.registerManual(name, email, password)
+                // 2. Intentar registrar en Firebase (almacenamos birthDate)
+                val user = userRepository.registerManual(name, birthDate, email, password)
 
                 Log.d(TAG, "Registro exitoso en Firestore. ID: ${user.id}") // LOG 3
 
@@ -67,6 +69,20 @@ class AuthViewModel : ViewModel() {
             } finally {
                 isLoading.value = false
                 Log.d(TAG, "Proceso finalizado. IsLoading = false") // LOG 5
+            }
+        }
+    }
+
+    // Observa los cambios del usuario en Firestore en tiempo real
+    private var userObserverJob: Job? = null
+
+    fun observeUser(userId: String) {
+        if (userId.isBlank()) return
+
+        userObserverJob?.cancel()
+        userObserverJob = viewModelScope.launch {
+            userRepository.listenUser(userId).collectLatest { user ->
+                currentUser.value = user
             }
         }
     }
@@ -146,5 +162,17 @@ class AuthViewModel : ViewModel() {
         currentUser.value = null
         isLoggedIn.value = false
         errorMessage.value = null
+    }
+
+    // Actualizar perfil del usuario
+    suspend fun updateUserProfile(user: User) {
+        try {
+            userRepository.updateUser(user)
+            currentUser.value = user
+            Log.d(TAG, "Perfil actualizado correctamente")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error al actualizar perfil: ${e.message}", e)
+            throw e
+        }
     }
 }

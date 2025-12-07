@@ -104,7 +104,16 @@
     <string name="report_total_income">Total income :</string>
     <string name="report_spent_most">You spent most on:</string>
     <string name="report_earned_most">You earned most from:</string>
+    <string name="report_no_data_range">No movements in this date range</string>
 
     <!-- CALENDAR -->
     <string name="date_selected_label">Selected date: %1$s</string>
+    
+    <!-- PROFILE -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_info_title">Personal Information</string>
+    <string name="edit_profile_title">Edit Profile</string>
+    <string name="btn_edit_profile">Edit Profile</string>
+    <string name="hint_enter_name">Enter your name</string>
+    <string name="btn_change_language">Change language</string>
 </resources>

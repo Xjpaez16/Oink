@@ -1,6 +1,9 @@
 package com.example.oink.ui.startAplication
 
 import android.graphics.BitmapFactory
+import android.util.Log
+import androidx.compose.ui.res.stringResource
+import com.example.oink.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -26,14 +29,22 @@ fun SplashScreen(
 
 
     LaunchedEffect(Unit) {
+        Log.d("SplashScreen", "LaunchedEffect start - will delay then call onTimeout")
         delay(2500)
-        onTimeout()
+        try {
+            onTimeout()
+            Log.d("SplashScreen", "onTimeout called")
+        } catch (e: Exception) {
+            Log.e("SplashScreen", "Error calling onTimeout", e)
+        }
     }
 
 
     val bitmap = remember {
-        val inputStream = context.assets.open("CentralImage.png")
-        BitmapFactory.decodeStream(inputStream)
+        runCatching {
+            val inputStream = context.assets.open("CentralImage.png")
+            BitmapFactory.decodeStream(inputStream)
+        }.getOrNull()
     }
 
     Box(
@@ -47,18 +58,20 @@ fun SplashScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = "Splash logo",
-                modifier = Modifier
-                    .width(297.dp)
-                    .height(233.dp)
-            )
+            bitmap?.let { bmp ->
+                Image(
+                    bitmap = bmp.asImageBitmap(),
+                    contentDescription = "Splash logo",
+                    modifier = Modifier
+                        .width(297.dp)
+                        .height(233.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Tu mejor compañía financiera",
+                text = stringResource(id = R.string.slogan),
                 style = robotoSemiBoldStyle(
                     fontSize = 32.sp,
                     color = Color(0xFF0D3685)

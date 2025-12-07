@@ -9,5 +9,6 @@ data class User(
     val email: String = "",
     val authProvider: String = "", //  manual
     val passwordHash: String = "",
+    val birthDate: String = "",
     val createdAt: Date = Date()
 )
