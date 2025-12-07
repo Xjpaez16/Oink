@@ -30,9 +30,6 @@ class ExpenseIncomeViewModel : ViewModel() {
     var isLoading by mutableStateOf(false)
         private set
 
-    /**
-     * Carga los movimientos y los guarda en la variable CORRECTA según el tipo.
-     */
     fun loadMovementsByType(type: MovementType, userId: String) {
         if (userId.isBlank()) return
 
@@ -77,8 +74,7 @@ class ExpenseIncomeViewModel : ViewModel() {
         }
     }
 
-    // --- HELPERS PARA LA UI ---
-    // Estos métodos ayudan a que la UI sepa qué lista pintar sin saber de lógica interna
+
 
     fun getMovementsForType(type: MovementType): List<Movement> {
         return if (type == MovementType.EXPENSE) expenseMovements else incomeMovements
@@ -86,5 +82,18 @@ class ExpenseIncomeViewModel : ViewModel() {
 
     fun getTotalForType(type: MovementType): Double {
         return if (type == MovementType.EXPENSE) expenseTotal else incomeTotal
+    }
+    
+    fun deleteMovement(movement: Movement) {
+        viewModelScope.launch {
+            try {
+                repository.deleteMovement(movement.id)
+                //reload the view
+                val typeEnum = if (movement.type == MovementType.INCOME.name) MovementType.INCOME else MovementType.EXPENSE
+                loadMovementsByType(typeEnum, movement.userId)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }

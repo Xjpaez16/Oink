@@ -33,16 +33,16 @@ import com.example.oink.ui.theme.robotoBoldStyle
 fun PieChartWithIcons(
     movements: List<Movement>
 ) {
-    // 1. Mapeamos los movimientos a rebanadas del pastel
+
     val slices = movements.map { movement ->
         PieChartData.Slice(
-            value = movement.amount.toFloat(), // Convertimos Long a Float para la gráfica
-            // 2. CORRECCIÓN: 'movement.type' es String, lo comparamos con el nombre del Enum
+            value = movement.amount.toFloat(),
+
             color = if (movement.type == MovementType.INCOME.name) Color(0xFF2997FD) else Color(0xFF0D3685)
         )
     }
 
-    // (Eliminé la columna vacía que tenías aquí con <caret>)
+
 
     Column(
         modifier = Modifier
@@ -60,13 +60,13 @@ fun PieChartWithIcons(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // LEYENDA DEL GRÁFICO
+
         Row(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .offset(y = (20).dp) // Ajusté un poco el offset para que no quede tan lejos
+                .offset(y = (20).dp)
         ) {
             // Item Ingresos
             Row(
@@ -81,7 +81,7 @@ fun PieChartWithIcons(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
 
-                // 3. Usamos stringResource
+
                 Text(
                     text = stringResource(R.string.pie_income), // "Ingresos"
                     style = robotoBoldStyle(
@@ -91,7 +91,7 @@ fun PieChartWithIcons(
                 )
             }
 
-            // Item Gastos
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start,
@@ -104,7 +104,7 @@ fun PieChartWithIcons(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
 
-                // 3. Usamos stringResource
+
                 Text(
                     text = stringResource(R.string.pie_expenses), // "Gastos"
                     style = robotoBoldStyle(

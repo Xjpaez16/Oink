@@ -6,13 +6,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import java.util.Date
 
 class MovementRepository(
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) {
     private val movements = db.collection("movements")
 
-    // --- Funciones Básicas CRUD ---
 
     suspend fun createMovement(movement: Movement): String {
         val ref = movements.document()
@@ -21,7 +21,7 @@ class MovementRepository(
         return ref.id
     }
 
-    // Alias para compatibilidad si tu ViewModel llama a 'addMovement'
+
     suspend fun addMovement(movement: Movement) {
         createMovement(movement)
     }
@@ -29,12 +29,8 @@ class MovementRepository(
     suspend fun getMovementById(id: String): Movement? =
         movements.document(id).get().await().toObject(Movement::class.java)
 
-    // --- Funciones solicitadas por BalanceViewModel ---
 
-    /**
-     * Obtiene TODOS los movimientos de la colección.
-     * OJO: En una app real deberías filtrar por 'userId' para no traer datos de otros.
-     */
+
     suspend fun getAllMovements(): List<Movement> {
         val snapshot = movements.get().await()
         return snapshot.toObjects(Movement::class.java)
@@ -78,7 +74,7 @@ class MovementRepository(
         return (income - expense).toDouble()
     }
 
-    // --- Funciones Reactivas (Flow) y Avanzadas ---
+
 
     fun getMovementsByUser(userId: String) = callbackFlow {
         val listener = movements
@@ -99,6 +95,20 @@ class MovementRepository(
     }
 
     suspend fun getMovementsByDateRange(userId: String, start: Long, end: Long): List<Movement> {
+
+        val startDate = Date(start)
+        val endDate = Date(end)
+
+        val query = movements
+            .whereEqualTo("userId", userId)
+            .whereGreaterThanOrEqualTo("date", startDate)
+            .whereLessThanOrEqualTo("date", endDate)
+            .get().await()
+
+        return query.toObjects(Movement::class.java)
+    }
+
+    suspend fun getMovementsByDate(userId: String, start: Date, end: Date): List<Movement> {
         // Firestore stores dates as Timestamp/Date objects. Convert epoch millis to Date
         // so comparisons use the same types and the queries work as expected.
         val startDate = java.util.Date(start)

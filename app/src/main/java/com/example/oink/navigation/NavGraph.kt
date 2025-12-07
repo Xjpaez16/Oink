@@ -12,6 +12,7 @@ import androidx.navigation.navArgument
 import com.example.oink.data.model.MovementType
 import com.example.oink.data.model.User
 import com.example.oink.ui.consult_movs.Consult_movs_view
+import com.example.oink.ui.edit.EditMovementView
 import com.example.oink.ui.enter_expenses.Enter_expense_view
 import com.example.oink.ui.enter_money.Enter_money_view
 import com.example.oink.ui.expense.ExpenseScreen
@@ -104,6 +105,51 @@ fun AppNavGraph(navController: NavHostController) {
                 )
             }
         }
+        composable(NavRoutes.Expenses.route) {
+            ExpenseScreen(
+                type = MovementType.EXPENSE,
+                viewModel = expenseIncomeViewModel,
+                authViewModel = authViewModel,
+                onNavigateToIncome = { navController.navigate(NavRoutes.Income.route) },
+                onNavigateToEnter = {navController.navigate(NavRoutes.insert_expenses.route)},
+                navController = navController,
+            )
+        }
+        composable(NavRoutes.Income.route) {
+            IncomeScreen(
+                type = MovementType.INCOME,
+                viewModel = expenseIncomeViewModel,
+                authViewModel = authViewModel,
+                onNavigateToExpense = { navController.navigate(NavRoutes.Expenses.route) },
+                onNavigateToEnter = {navController.navigate(NavRoutes.insert_income.route)},
+                navController = navController,
+            )
+        }
+        composable(
+            route = NavRoutes.EditMovement.route,
+            arguments = listOf(
+                navArgument("movementId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val movementId = backStackEntry.arguments?.getString("movementId") ?: ""
+            EditMovementView(
+                movementId = movementId,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+
+        composable(NavRoutes.insert_expenses.route) {
+            val user = authViewModel.getLoggedUser()
+            if (user != null) {
+            Enter_expense_view(
+                movementViewModel = expensemovementViewModel,
+                recurringViewModel = expenseRecurringMovementViewModel,
+                userId = user.id,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
 
             composable(NavRoutes.Expenses.route) {
                 ExpenseScreen(
@@ -212,6 +258,11 @@ fun AppNavGraph(navController: NavHostController) {
                 Consult_movs_view(navController = navController)
             }
 
+        composable(NavRoutes.Consult_movs.route) {
+            Consult_movs_view(
+                navController = navController,
+                authViewModel = authViewModel
+            )
             composable(NavRoutes.Profile.route) {
                 val user = authViewModel.getLoggedUser()
                 if (user != null) {

@@ -111,6 +111,14 @@
 
     <!-- CALENDARIO -->
     <string name="date_selected_label">Fecha seleccionada: %1$s</string>
+
+    <!-- DIALOGO DE CANCELACION -->
+    <string name="dialog_cancel_title">¿Estás seguro de que quieres eliminar este movimiento?</string>
+    <string name="title_cancel">Eliminar Movimiento</string>
+    <string name="confirm_cancel">Eliminar</string>
+    <string name="cancel_cancel">Cancelar</string>
+
+
     
     <!-- PROFILE -->
     <string name="profile_title">Perfil</string>

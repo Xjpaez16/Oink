@@ -9,6 +9,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
@@ -51,7 +52,9 @@ fun OinkTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = lightColorScheme(
+            primary = Color(0xFF2997FD)
+        ),
         typography = Typography,
         content = content
     )
