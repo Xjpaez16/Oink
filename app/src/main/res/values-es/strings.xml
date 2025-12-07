@@ -125,4 +125,10 @@
     <string name="logout_confirm">Cerrar sesión</string>
     <string name="logout_cancel">Cancelar</string>
     <string name="btn_logout">Cerrar sesión</string>
+
+    <!-- NOTIFICACIONES -->
+    <string name="notification_expense_added">Gasto agregado correctamente</string>
+    <string name="notification_income_added">Ingreso agregado correctamente</string>
+    <string name="notification_goal_achieved">¡Felicidades! Alcanzaste tu meta</string>
+    <string name="notification_goal_created">¡Meta creada correctamente!</string>
 </resources>

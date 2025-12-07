@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +34,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
+import com.example.oink.ui.components.NotificationBubble
 import com.example.oink.ui.theme.robotoBoldStyle
 import com.example.oink.ui.theme.robotoMediumStyle
 import com.example.oink.ui.theme.robotoSemiBoldStyle
@@ -54,9 +57,20 @@ fun Enter_expense_view(
     var isRecurring by remember { mutableStateOf(false) }
     var selectedFrequency by remember { mutableStateOf("monthly") } // Valor por defecto
 
-
+    val context = LocalContext.current
     val noneCategory = stringResource(R.string.category_none)
     val colorAccent = Color(0xFF2997FD)
+    val notificationMessage = stringResource(R.string.notification_expense_added)
+    var showNotification by remember { mutableStateOf(false) }
+    var notifyText by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(showNotification) {
+        if (showNotification) {
+            delay(2500)
+            showNotification = false
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -254,14 +268,21 @@ fun Enter_expense_view(
                                     frequency = selectedFrequency
                                 )
                                 movementViewModel.createMovement(initialMovement) {
-                                    // Limpiar UI y volver
+                                        // Show success notification (custom bubble)
+                                        notifyText = notificationMessage
+                                        showNotification = true
+                                    // Limpiar UI
                                     description = ""
                                     amount = ""
                                     selectedDate = ""
                                     categoriaSeleccionada = null
                                     isRecurring = false
                                     selectedFrequency = "monthly"
-                                    onBackClick()
+                                    // Delay navigation so the notification is visible
+                                    coroutineScope.launch {
+                                        delay(2500)
+                                        onBackClick()
+                                    }
                                 }
                             }
                         } else {
@@ -278,12 +299,19 @@ fun Enter_expense_view(
                             )
                             // Guardar en 'movements'
                             movementViewModel.createMovement(movement) {
-                                // Limpiar UI y volver
+                                // Show success notification (custom bubble)
+                                notifyText = notificationMessage
+                                showNotification = true
+                                // Limpiar UI
                                 description = ""
                                 amount = ""
                                 selectedDate = ""
                                 categoriaSeleccionada = null
-                                onBackClick()
+                                // Delay navigation so the notification is visible
+                                coroutineScope.launch {
+                                    delay(2500)
+                                    onBackClick()
+                                }
                             }
                         }
                     },
@@ -293,6 +321,7 @@ fun Enter_expense_view(
                 }
             }
         }
+        NotificationBubble(visible = showNotification, message = notifyText)
     }
 }
 

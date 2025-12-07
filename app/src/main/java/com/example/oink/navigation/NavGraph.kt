@@ -213,12 +213,15 @@ fun AppNavGraph(navController: NavHostController) {
             route = NavRoutes.DepositGoal.route,
             arguments = listOf(
                 navArgument("goalId") { type = NavType.StringType },
-                navArgument("goalName") { type = NavType.StringType }
+                navArgument("goalName") { type = NavType.StringType },
+                navArgument("goalPrice") { type = NavType.StringType }
             )
         ) { backStackEntry ->
             val goalId = backStackEntry.arguments?.getString("goalId") ?: ""
             val goalName =
                 backStackEntry.arguments?.getString("goalName") ?: "Meta Desconocida"
+            val goalPrice =
+                backStackEntry.arguments?.getString("goalPrice") ?: "0"
             val user = authViewModel.getLoggedUser()
 
             if (user != null && goalId.isNotBlank()) {
@@ -226,6 +229,7 @@ fun AppNavGraph(navController: NavHostController) {
                     userName = user.name,
                     goalId = goalId,
                     goalName = goalName,
+                    goalPrice = goalPrice,
                     authViewModel = authViewModel,
                     onClose = { navController.popBackStack() }
                 )

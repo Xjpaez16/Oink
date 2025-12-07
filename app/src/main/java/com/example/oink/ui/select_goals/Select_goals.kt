@@ -156,7 +156,7 @@ fun ObjetivoCard(
 
     Card(
         onClick = {
-            navController.navigate("deposit_goal_screen/$goalId/$titulo")
+            navController.navigate("deposit_goal_screen/$goalId/$titulo/$meta")
         },
         modifier = Modifier
             .fillMaxWidth()

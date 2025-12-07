@@ -126,4 +126,10 @@
     <string name="logout_confirm">Sign Out</string>
     <string name="logout_cancel">Cancel</string>
     <string name="btn_logout">Sign Out</string>
+
+    <!-- NOTIFICACIONES -->
+    <string name="notification_expense_added">Expense added successfully</string>
+    <string name="notification_income_added">Income added successfully</string>
+    <string name="notification_goal_achieved">Congratulations! You reached your goal</string>
+    <string name="notification_goal_created">Goal created successfully!</string>
 </resources>
