@@ -53,9 +53,6 @@ class ReportViewModel : ViewModel() {
     var startDate by mutableStateOf(LocalDate.now().minusMonths(1))
         private set
 
-
-            _totalExpenses.value = (100000..500000).random()
-            _totalIncome.value = (200000..700000).random()
     var endDate by mutableStateOf(LocalDate.now())
         private set
 
