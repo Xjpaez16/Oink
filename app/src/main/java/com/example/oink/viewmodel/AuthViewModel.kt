@@ -159,9 +159,11 @@ class AuthViewModel : ViewModel() {
     fun getLoggedUser(): User? = currentUser.value
 
     fun logout() {
+        // Asegura que esto ocurra en el hilo principal o actualice el estado inmediatamente
         currentUser.value = null
         isLoggedIn.value = false
         errorMessage.value = null
+        isLoading.value = false // Asegúrate de apagar el loading por si acaso
     }
 
     // Actualizar perfil del usuario

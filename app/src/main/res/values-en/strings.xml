@@ -121,4 +121,9 @@
     <string name="btn_edit_profile">Edit Profile</string>
     <string name="hint_enter_name">Enter your name</string>
     <string name="btn_change_language">Change language</string>
+    <string name="logout_title">Sign Out</string>
+    <string name="logout_message">Are you sure you want to sign out?</string>
+    <string name="logout_confirm">Sign Out</string>
+    <string name="logout_cancel">Cancel</string>
+    <string name="btn_logout">Sign Out</string>
 </resources>

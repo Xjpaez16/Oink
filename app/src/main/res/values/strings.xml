@@ -127,4 +127,9 @@
     <string name="btn_edit_profile">Editar Perfil</string>
     <string name="hint_enter_name">Ingresa tu nombre</string>
     <string name="btn_change_language">Cambiar idioma</string>
+    <string name="logout_title">Cerrar sesión</string>
+    <string name="logout_message">¿Estás seguro de que deseas cerrar sesión?</string>
+    <string name="logout_confirm">Cerrar sesión</string>
+    <string name="logout_cancel">Cancelar</string>
+    <string name="btn_logout">Cerrar sesión</string>
 </resources>
