@@ -20,15 +20,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -47,6 +52,11 @@ import com.example.oink.ui.theme.robotoExtraBoldStyle
 import com.example.oink.ui.theme.robotoMediumStyle
 import com.example.oink.viewmodel.AuthViewModel
 import com.example.oink.viewmodel.ExpenseIncomeViewModel
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import com.example.oink.data.model.Movement
+import com.example.oink.ui.theme.robotoBoldStyle
+import com.example.oink.ui.theme.robotoRegularStyle
 
 @Composable
 fun IncomeScreen(
@@ -79,6 +89,79 @@ fun IncomeScreen(
     val movements = viewModel.getMovementsForType(type)
     val t_income = viewModel.getTotalForType(type)
 
+    // Estado para el diálogo de confirmación
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var movementToDelete by remember { mutableStateOf<Movement?>(null) }
+
+    if (showDeleteDialog && movementToDelete != null) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteDialog = false
+                movementToDelete = null
+            },
+            containerColor = Color.White,
+            icon = {
+                logo?.let {
+                    Image(
+                        bitmap = it,
+                        contentDescription = stringResource(R.string.desc_logo),
+                        modifier = Modifier
+                            .size(90.dp)
+                            .padding(bottom = 8.dp)
+                    )
+                }
+            },
+            title = {
+                Text(
+                    text = stringResource(R.string.title_cancel),
+                    style = robotoBoldStyle(
+                        fontSize = 28.sp,
+                        color = Color.Black
+                    ),
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.dialog_cancel_title),
+                    style = robotoRegularStyle(
+                        fontSize = 16.sp,
+                        color = Color.Black
+                    ),
+                    modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        movementToDelete?.let { viewModel.deleteMovement(it) }
+                        showDeleteDialog = false
+                        movementToDelete = null
+                    }
+                ) {
+                    Text(
+                        text = stringResource(R.string.confirm_cancel),
+                        color = Color(0XFF0D3685),
+                        style = robotoBoldStyle(fontSize = 16.sp)
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        movementToDelete = null
+                    }
+                ) {
+                    Text(
+                        text = stringResource(R.string.cancel_cancel),
+                        color = Color(0xFF2997FD),
+                        style = robotoBoldStyle(fontSize = 16.sp)
+                    )
+                }
+            }
+        )
+    }
 
     Scaffold(
         bottomBar = { BottomNavBar(navController) },
@@ -203,8 +286,52 @@ fun IncomeScreen(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         movements.forEach { movement ->
-                            MovementItem(movement = movement)
-                            Spacer(modifier = Modifier.height(8.dp))
+                            key(movement.id) {
+                                val dismissState = rememberSwipeToDismissBoxState(
+                                    confirmValueChange = {
+                                        if (it == SwipeToDismissBoxValue.EndToStart) {
+                                            movementToDelete = movement
+                                            showDeleteDialog = true
+                                            false
+                                        } else {
+                                            false
+                                        }
+                                    }
+                                )
+
+                                SwipeToDismissBox(
+                                    state = dismissState,
+                                    backgroundContent = {
+                                        val color = if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+                                            Color(0xFFFF5E5E)
+                                        } else {
+                                            Color.Transparent
+                                        }
+
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .padding(vertical = 8.dp)
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .background(color)
+                                                .padding(horizontal = 20.dp),
+                                            contentAlignment = Alignment.CenterEnd
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = "Eliminar",
+                                                tint = Color.White
+                                            )
+                                        }
+                                    },
+                                    content = {
+                                        MovementItem(movement = movement)
+                                    }
+                                )
+                                Spacer(modifier = Modifier
+                                    .height(8.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -236,4 +363,3 @@ fun IncomeScreen(
         }
     }
 }
-

@@ -1,5 +1,7 @@
 package com.example.oink.ui.enter_money
 
+import android.app.DatePickerDialog
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,6 +30,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.ui.platform.LocalContext
+import com.example.oink.ui.theme.robotoBoldStyle
+import com.example.oink.ui.theme.robotoMediumStyle
 import java.util.concurrent.TimeUnit
 import kotlin.collections.List
 
@@ -57,7 +63,7 @@ fun Enter_money_view(
             .background(Color.White),
         contentAlignment = Alignment.TopStart
     ) {
-        Column(modifier = Modifier.padding(top = 200.dp)) {
+        Column(modifier = Modifier.padding(top = 148.dp)) {
 
 
             Text(
@@ -74,7 +80,15 @@ fun Enter_money_view(
             TextField(
                 value = description,
                 onValueChange = { description = it },
-                placeholder = { Text(stringResource(R.string.hint_description), color = Color.LightGray, fontSize = 40.sp, fontWeight = FontWeight.Bold) },
+                placeholder = { Text(stringResource(R.string.hint_description),
+                    style = robotoBoldStyle(
+                        fontSize = 32.sp,
+                        color = Color(0xFFCAC4D0)
+                    ),) },
+                textStyle = robotoMediumStyle(
+                    fontSize = 32.sp,
+                    color = Color(0xFF000000)
+                ),
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
@@ -92,7 +106,15 @@ fun Enter_money_view(
             TextField(
                 value = amount,
                 onValueChange = { amount = it },
-                placeholder = { Text(stringResource(R.string.hint_amount), color = Color.LightGray, fontSize = 40.sp, fontWeight = FontWeight.Bold) },
+                placeholder = { Text(stringResource(R.string.hint_amount),
+                    style = robotoBoldStyle(
+                        fontSize = 32.sp,
+                        color = Color(0xFFCAC4D0)
+                    ),) },
+                textStyle = robotoMediumStyle(
+                    fontSize = 32.sp,
+                    color = Color(0xFF27B3AC)
+                ),
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
@@ -312,7 +334,8 @@ fun FrequencyDropdown(
         OutlinedButton(
             onClick = { expanded = true },
             modifier = Modifier.fillMaxWidth(),
-            border = BorderStroke(1.dp, Color.LightGray)
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF2997FD)),
+            border = BorderStroke(2.dp, Color(0xFF2997FD)),
         ) {
             Text(displayValue, color = Color.Black)
             Icon(
@@ -326,11 +349,19 @@ fun FrequencyDropdown(
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
+            containerColor = Color(0xFF2997FD),
+            shape = RoundedCornerShape(10.dp),
             modifier = Modifier.fillMaxWidth(0.9f)
         ) {
             frequencies.forEach { (label, value) ->
                 DropdownMenuItem(
-                    text = { Text(label) },
+                    text = {
+                        Text(label,
+                        style = robotoBoldStyle(
+                            fontSize = 14.sp,
+                            color = Color.White
+                        ))
+                           },
                     onClick = {
                         onFrequencySelected(value)
                         expanded = false
@@ -357,7 +388,7 @@ fun ListaCategorias(
     FlowRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 34.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -406,28 +437,26 @@ fun CalendarPickerExample(
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
+    val context = LocalContext.current
 
     if (showDialog) {
-        DatePickerDialog(
-            onDismissRequest = { showDialog = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                        onDateSelected(formatter.format(Date(millis)))
-                    }
-                    showDialog = false
-                }) {
-                    Text(stringResource(R.string.btn_ok))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(R.string.btn_cancel))
-                }
-            }
+        // Usamos Dialog nativo + ContextThemeWrapper para aplicar estilo XML
+        AndroidViewBindingDialog(
+            theme = R.style.DatePickerTheme,
+            onDismiss = { showDialog = false }
         ) {
-            DatePicker(state = datePickerState)
+            DatePickerDialog(
+                ContextThemeWrapper(context, R.style.DatePickerTheme),
+                { _, year, month, dayOfMonth ->
+                    onDateSelected(
+                        "%02d/%02d/%04d".format(dayOfMonth, month + 1, year)
+                    )
+                },
+                // Fecha inicial
+                Calendar.getInstance().get(Calendar.YEAR),
+                Calendar.getInstance().get(Calendar.MONTH),
+                Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+            ).show()
         }
     }
 
@@ -439,11 +468,28 @@ fun CalendarPickerExample(
             .height(60.dp)
     ) {
         Text(
-            if (selectedDate.isEmpty()) stringResource(R.string.date_button_placeholder) else stringResource(R.string.date_button_format, selectedDate),
+            if (selectedDate.isEmpty()) stringResource(R.string.date_button_placeholder)
+            else stringResource(R.string.date_button_format, selectedDate),
             fontSize = if (selectedDate.isEmpty()) 30.sp else 14.sp
         )
     }
 }
+
+@Composable
+fun AndroidViewBindingDialog(
+    theme: Int,
+    onDismiss: () -> Unit,
+    show: () -> Unit
+) {
+    val context = LocalContext.current
+    DisposableEffect(Unit) {
+        val themedContext = ContextThemeWrapper(context, theme)
+        show()
+        onDispose { onDismiss() }
+    }
+}
+
+
 
 @Preview
 @Composable

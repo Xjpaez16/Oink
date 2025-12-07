@@ -16,6 +16,8 @@ sealed class NavRoutes(val route : String){
     object SelectGoal : NavRoutes("select_goals")
 
     object DepositGoal : NavRoutes("deposit_goal_screen/{goalId}/{goalName}")
-
+    object EditMovement : NavRoutes("edit_movement/{movementId}") {
+        fun createRoute(id: String) = "edit_movement/$id"
+    }
 
 }

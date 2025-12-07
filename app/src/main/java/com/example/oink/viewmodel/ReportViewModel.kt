@@ -42,7 +42,7 @@ class ReportViewModel : ViewModel() {
     private fun refreshReport() {
         viewModelScope.launch {
 
-            // Simulación
+
             _totalExpenses.value = (100000..500000).random()
             _totalIncome.value = (200000..700000).random()
 
@@ -50,16 +50,6 @@ class ReportViewModel : ViewModel() {
             _mostSpentCategory.value = categories.random()
             _mostIncomeCategory.value = categories.random()
 
-            // --------------------------------------------------
-            // Firebase
-            //
-            // Firebase.firestore.collection("transacciones")
-            //      .whereGreaterThanOrEqualTo("fecha", startDate.value)
-            //      .whereLessThanOrEqualTo("fecha", endDate.value)
-            //      .get()
-            //      .addOnSuccessListener { ... }
-            //
-            // --------------------------------------------------
         }
     }
 }

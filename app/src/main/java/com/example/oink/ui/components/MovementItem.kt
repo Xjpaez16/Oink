@@ -1,6 +1,7 @@
 package com.example.oink.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,8 +23,11 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Composable
-fun MovementItem(movement: Movement) {
-    // 1. CORRECCIÓN: Comparamos el String 'type' con el nombre del Enum
+fun MovementItem(
+    movement: Movement,
+    onMovementClick: ((Movement) -> Unit)? = null // Callback opcional para el click
+) {
+
     val isIncome = movement.type == MovementType.INCOME.name
 
     Row(
@@ -31,6 +35,9 @@ fun MovementItem(movement: Movement) {
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .background(Color.White, RoundedCornerShape(12.dp))
+            .clickable(enabled = onMovementClick != null) { 
+                onMovementClick?.invoke(movement) 
+            }
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -45,12 +52,10 @@ fun MovementItem(movement: Movement) {
                     .background(if (isIncome) Color(0xFF2997FD) else Color(0xFF0D3685), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                // 2. CORRECCIÓN: 'category' ahora es String. Usamos la función auxiliar para obtener el ícono.
-                // Nota: Asegúrate de importar o copiar la función getIconForCategory de ExpenseIncomeChart.kt
-                // Si no quieres copiarla, te la pongo abajo también para que este archivo funcione solo.
+
                 Icon(
                     painter = painterResource(id = getIconForCategoryItem(movement.category)),
-                    contentDescription = movement.category, // category ya es el nombre (String)
+                    contentDescription = movement.category,
                     tint = Color.White,
                     modifier = Modifier.size(24.dp)
                 )
@@ -60,7 +65,7 @@ fun MovementItem(movement: Movement) {
 
             Column {
                 Text(
-                    text = movement.category, // 3. CORRECCIÓN: category es directo un String
+                    text = movement.category,
                     style = robotoRegularStyle(
                         fontSize = 12.sp,
                         color = Color.Gray
@@ -74,7 +79,7 @@ fun MovementItem(movement: Movement) {
                     )
                 )
 
-                // 4. CORRECCIÓN: Formatear la fecha (Date) a String
+
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 Text(
                     text = dateFormat.format(movement.date),
@@ -99,7 +104,7 @@ fun MovementItem(movement: Movement) {
                     )
                     .padding(horizontal = 12.dp, vertical = 4.dp)
             ) {
-                // 5. CORRECCIÓN: amount es Long, funciona bien con el format, pero aseguramos
+
                 Text(
                     text = "$${"%,.0f".format(movement.amount.toFloat())}",
                     style = robotoMediumStyle(
@@ -112,10 +117,9 @@ fun MovementItem(movement: Movement) {
     }
 }
 
-// Función auxiliar para obtener iconos (copia local para este archivo o impórtala si la hiciste pública)
-@Composable
+
 fun getIconForCategoryItem(categoryName: String): Int {
-    // Usamos com.example.oink.R para acceder a los recursos
+
     return when (categoryName) {
         "Transporte", "Transport" -> com.example.oink.R.drawable.directions_bus
         "Hogar", "Home" -> com.example.oink.R.drawable.house_2

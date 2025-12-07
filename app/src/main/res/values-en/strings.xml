@@ -107,4 +107,9 @@
 
     <!-- CALENDAR -->
     <string name="date_selected_label">Selected date: %1$s</string>
+    <!-- DIALOGO DE CANCELACION -->
+    <string name="dialog_cancel_title">Are you sure you want to delete this move?</string>
+    <string name="title_cancel">Delete Movement</string>
+    <string name="confirm_cancel">Delete</string>
+    <string name="cancel_cancel">Cancel</string>
 </resources>

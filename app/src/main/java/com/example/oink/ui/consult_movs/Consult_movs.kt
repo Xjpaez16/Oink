@@ -22,6 +22,7 @@ import com.example.oink.ui.components.MovementItem
 import com.example.oink.viewmodel.AuthViewModel
 import com.example.oink.viewmodel.ConsultMovsViewModel
 import java.util.Date
+import java.util.TimeZone
 
 @Composable
 fun Consult_movs_view(
@@ -115,7 +116,8 @@ fun CalendarVisible(
     // Observador que se activa cada vez que se elige una nueva fecha.
     LaunchedEffect(datePickerState.selectedDateMillis) {
         datePickerState.selectedDateMillis?.let { millis ->
-            onDateSelected(Date(millis))
+            val offset = TimeZone.getDefault().getOffset(millis)
+            onDateSelected(Date(millis - offset))
         }
     }
 
@@ -124,6 +126,7 @@ fun CalendarVisible(
         state = datePickerState,
         showModeToggle = true,
         colors = DatePickerDefaults.colors(
+
             selectedDayContainerColor = Color(0xFF2997FD),
             todayDateBorderColor = Color(0xFF2997FD),
             todayContentColor = Color(0xFF0D3685)

@@ -7,7 +7,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.oink.data.model.Movement
 import com.example.oink.data.model.MovementType
 import com.example.oink.data.repository.MovementRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 class ExpenseMovemetViewModel(
@@ -129,4 +133,20 @@ class ExpenseMovemetViewModel(
             }
         }
     }
+    // En ExpenseMovemetViewModel.kt
+
+    // Función para obtener un movimiento por ID (usado para cargar datos al editar)
+    fun getMovementById(id: String): Flow<Movement?> = flow {
+        val result = repo.getMovementById(id)
+        emit(result)
+    }.flowOn(Dispatchers.IO)
+
+
+    // Función para actualizar (UPDATE)
+    fun updateMovement(movement: Movement) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repo.updateMovement(movement)
+        }
+    }
+
 }

@@ -67,4 +67,14 @@ class BalanceViewModel : ViewModel() {
     fun getMovementsByType(type: MovementType): List<Movement> {
         return movements.filter { it.type == type.name }
     }
+
+    fun deleteMovement(movement: Movement) {
+        viewModelScope.launch {
+            try {
+                repository.deleteMovement(movement.id)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 }
