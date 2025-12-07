@@ -55,6 +55,7 @@ import com.example.oink.viewmodel.ExpenseIncomeViewModel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import com.example.oink.data.model.Movement
+import com.example.oink.navigation.NavRoutes
 import com.example.oink.ui.theme.robotoBoldStyle
 import com.example.oink.ui.theme.robotoRegularStyle
 
@@ -326,7 +327,14 @@ fun ExpenseScreen(
                                         }
                                     },
                                     content = {
-                                        MovementItem(movement = movement)
+                                        MovementItem(
+                                            movement = movement,
+                                            onMovementClick = {
+                                                navController.navigate(
+                                                    NavRoutes.EditMovement.createRoute(it.id)
+                                                )
+                                            }
+                                        )
                                     }
                                 )
                                 Spacer(modifier = Modifier
