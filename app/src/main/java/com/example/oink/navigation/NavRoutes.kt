@@ -20,4 +20,6 @@ sealed class NavRoutes(val route : String){
         fun createRoute(id: String) = "edit_movement/$id"
     }
 
+    object Profile : NavRoutes("profile")
+
 }

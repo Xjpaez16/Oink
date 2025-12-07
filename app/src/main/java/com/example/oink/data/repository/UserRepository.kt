@@ -16,6 +16,7 @@ class UserRepository(
 
     suspend fun registerManual(
         name: String,
+        birthDate: String,
         email: String,
         password: String
     ): User {
@@ -36,6 +37,7 @@ class UserRepository(
             email = email,
             authProvider = "manual",
             passwordHash = hash,
+            birthDate = birthDate,
             createdAt = Date()
         )
 

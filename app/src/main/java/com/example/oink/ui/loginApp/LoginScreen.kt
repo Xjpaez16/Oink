@@ -39,13 +39,15 @@ import com.example.oink.R
 import com.example.oink.ui.components.TextFieldWithLabel
 import com.example.oink.ui.components.LoadingScreen
 import com.example.oink.ui.theme.robotoBoldStyle
+import com.example.oink.utils.LocaleHelper
 import com.example.oink.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel = viewModel(),
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    onToggleLanguage: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -112,9 +114,9 @@ fun LoginScreen(
     // --------------------------------
 
     if (isLoading) {
-        LoadingScreen(animationRes = R.raw.pig_money, message = "Iniciando sesión...")
+        LoadingScreen(animationRes = R.raw.pig_money, message = stringResource(R.string.msg_logging_in))
     } else if (isLoggedIn) {
-        LoadingScreen(animationRes = R.raw.pig_money, message = "¡Bienvenido!")
+        LoadingScreen(animationRes = R.raw.pig_money, message = stringResource(R.string.msg_welcome))
         // Aquí el AppNavGraph detectará el cambio de isLoggedIn y navegará al Home
     } else {
         Box(
@@ -236,6 +238,29 @@ fun LoginScreen(
                         onClick = { onGoogleSignInClick() },
                         modifier = Modifier.offset(x = (-10).dp)
                     )
+
+                    // Botón CAMBIAR IDIOMA
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            LocaleHelper.changeLanguage(context)
+                            Toast.makeText(context, context.getString(R.string.btn_change_language), Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(43.dp)
+                            .offset(x = (-10).dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D3685)),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.btn_change_language),
+                            style = robotoBoldStyle(
+                                fontSize = 16.sp,
+                                color = Color.White
+                            )
+                        )
+                    }
                 }
             }
         }

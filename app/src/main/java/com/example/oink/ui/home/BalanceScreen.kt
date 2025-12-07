@@ -172,12 +172,14 @@ fun BalanceScreen(
                         modifier = Modifier.size(80.dp)
                     )
                 }
-                Icon(
-                    painter = painterResource(id = R.drawable.settings),
-                    contentDescription = stringResource(R.string.desc_settings),
-                    tint = Color(0xFF0D3685),
-                    modifier = Modifier.size(24.dp)
-                )
+                IconButton(onClick = { navController.navigate(com.example.oink.navigation.NavRoutes.Profile.route) }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.settings),
+                        contentDescription = stringResource(R.string.desc_settings),
+                        tint = Color(0xFF0D3685),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
