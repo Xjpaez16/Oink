@@ -36,6 +36,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.CustomCredential
 import androidx.credentials.exceptions.GetCredentialException
+import com.example.oink.BuildConfig
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.launch
@@ -69,22 +70,25 @@ fun RegisterScreen(
     var f_nacimiento by remember { mutableStateOf("") }
     var nombre by remember { mutableStateOf("") }
 
-    // Manejo de errores visuales (Toast)
+
     LaunchedEffect(errorMessage) {
         errorMessage?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
         }
     }
 
-    // --- LÓGICA DE GOOGLE SIGN-IN ---
+
     val credentialManager = CredentialManager.create(context)
 
-    // IMPORTANTE: Reemplaza esto con tu Web Client ID real de la consola de Google Cloud/Firebase
-    val webClientId = "TU_WEB_CLIENT_ID_AQUI.apps.googleusercontent.com"
+
+    val webClientId = BuildConfig.GOOGLE_WEB_CLIENT_ID
 
     val onGoogleSignInClick = {
         scope.launch {
             try {
+                Log.d("GoogleSignIn", "Iniciando Google Sign-In...")
+                Log.d("GoogleSignIn", "Web Client ID: $webClientId")
+
                 val googleIdOption = GetGoogleIdOption.Builder()
                     .setFilterByAuthorizedAccounts(false)
                     .setServerClientId(webClientId)
@@ -95,28 +99,35 @@ fun RegisterScreen(
                     .addCredentialOption(googleIdOption)
                     .build()
 
+                Log.d("GoogleSignIn", "Llamando a credentialManager.getCredential...")
                 val result = credentialManager.getCredential(
                     request = request,
                     context = context
                 )
 
+                Log.d("GoogleSignIn", "Credencial obtenida exitosamente")
                 val credential = result.credential
+
                 if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                     val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
 
-                    // Llamamos al ViewModel para registrar/loguear con Google
-                    viewModel.registerWithGoogle(
+                    Log.d("GoogleSignIn", "ID: ${googleIdTokenCredential.id}")
+                    Log.d("GoogleSignIn", "Name: ${googleIdTokenCredential.displayName}")
+
+                    viewModel.handleGoogleLogin(
                         googleId = googleIdTokenCredential.id,
                         name = googleIdTokenCredential.displayName ?: "Usuario Google",
-                        email = email // Nota: googleIdTokenCredential.id suele ser el email en esta librería
+                        email = googleIdTokenCredential.id
                     )
                 }
             } catch (e: GetCredentialException) {
-                Log.e("GoogleSignIn", "Error obteniendo credencial", e)
-                Toast.makeText(context, "Error Google: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("GoogleSignIn", "GetCredentialException: ${e.message}", e)
+                Log.e("GoogleSignIn", "Type: ${e.type}")
+                Log.e("GoogleSignIn", "Error Code: ${e.errorMessage}")
+                Toast.makeText(context, "Error Google: ${e.type} - ${e.errorMessage}", Toast.LENGTH_LONG).show()
             } catch (e: Exception) {
-                Log.e("GoogleSignIn", "Error general", e)
-                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("GoogleSignIn", "Exception general: ${e.message}", e)
+                Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }

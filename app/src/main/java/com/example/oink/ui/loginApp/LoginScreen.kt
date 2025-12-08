@@ -31,6 +31,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.CustomCredential
 import androidx.credentials.exceptions.GetCredentialException
+import com.example.oink.BuildConfig
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.launch
@@ -72,7 +73,7 @@ fun LoginScreen(
     // --- LÓGICA DE GOOGLE SIGN-IN ---
     val credentialManager = CredentialManager.create(context)
     // REEMPLAZA CON TU CLIENT ID
-    val webClientId = "TU_WEB_CLIENT_ID_AQUI.apps.googleusercontent.com"
+    val webClientId = BuildConfig.GOOGLE_WEB_CLIENT_ID
 
     val onGoogleSignInClick = {
         scope.launch {
@@ -99,7 +100,7 @@ fun LoginScreen(
                     viewModel.handleGoogleLogin(
                         googleId = googleIdTokenCredential.id,
                         name = googleIdTokenCredential.displayName ?: "Usuario Google",
-                        email = email
+                        email = googleIdTokenCredential.id
                     )
                 }
             } catch (e: GetCredentialException) {
