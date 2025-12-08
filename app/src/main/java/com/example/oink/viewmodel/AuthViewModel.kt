@@ -1,8 +1,10 @@
 package com.example.oink.viewmodel
 
+import android.app.Application
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.oink.data.model.User
 import com.example.oink.data.repository.UserRepository
@@ -10,29 +12,81 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class AuthViewModel : ViewModel() {
+// CAMBIO 1: Cambiar ViewModel() por AndroidViewModel(application) para tener acceso al Contexto
+class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     private val userRepository = UserRepository()
-    private val TAG = "AuthViewModel" // Etiqueta para filtrar en Logcat
+    private val TAG = "AuthViewModel"
 
-    // Estados observables
+
+    private val prefs = application.getSharedPreferences("oink_auth_prefs", Context.MODE_PRIVATE)
+    private val KEY_USER_ID = "logged_user_id"
+    private val KEY_LOGIN_TIMESTAMP = "login_timestamp"
+
+
     val isLoggedIn = mutableStateOf(false)
-    val isLoading = mutableStateOf(false)
+    val isLoading = mutableStateOf(true) // Iniciamos en true para verificar sesión al arrancar
     val errorMessage = mutableStateOf<String?>(null)
 
     val currentUser = mutableStateOf<User?>(null)
 
-    // ------------------------------------------------------
-    // REGISTRO MANUAL
-    // ------------------------------------------------------
+
+    init {
+        checkSession()
+    }
+
+    private fun checkSession() {
+        val savedUserId = prefs.getString(KEY_USER_ID, null)
+        val lastLoginTime = prefs.getLong(KEY_LOGIN_TIMESTAMP, 0)
+
+
+        val oneMonthMillis = 30L * 24 * 60 * 60 * 1000
+        val isSessionExpired = (System.currentTimeMillis() - lastLoginTime) > oneMonthMillis
+
+        if (savedUserId != null && !isSessionExpired) {
+            Log.d(TAG, "Sesión encontrada para ID: $savedUserId. Restaurando...")
+            viewModelScope.launch {
+                try {
+                    // Cargar datos frescos del usuario desde Firestore
+                    userRepository.listenUser(savedUserId).collectLatest { user ->
+                        if (user != null) {
+                            currentUser.value = user
+                            isLoggedIn.value = true
+                            // Actualizar timestamp para extender la sesión otro mes
+                            saveSession(user.id)
+                        } else {
+                            // Si el usuario existe en pref pero no en DB (fue borrado), cerrar sesión
+                            logout()
+                        }
+                        isLoading.value = false
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error restaurando sesión: ${e.message}")
+                    logout()
+                    isLoading.value = false
+                }
+            }
+        } else {
+            if (isSessionExpired) Log.d(TAG, "La sesión ha expirado por inactividad.")
+            isLoading.value = false // No hay sesión guardada
+        }
+    }
+
+    // Función auxiliar para guardar sesión
+    private fun saveSession(userId: String) {
+        prefs.edit().apply {
+            putString(KEY_USER_ID, userId)
+            putLong(KEY_LOGIN_TIMESTAMP, System.currentTimeMillis())
+            apply()
+        }
+    }
+
     fun register(name: String, birthDate: String, email: String, password: String) {
-        Log.d(TAG, "Iniciando registro para: $email") // LOG 1
+        Log.d(TAG, "Iniciando registro para: $email")
 
         viewModelScope.launch {
-            // 1. Validaciones
             if (name.isBlank() || email.isBlank() || password.isBlank()) {
                 errorMessage.value = "Por favor llena todos los campos obligatorios."
-                Log.e(TAG, "Error: Campos vacíos")
                 return@launch
             }
 
@@ -40,40 +94,30 @@ class AuthViewModel : ViewModel() {
             errorMessage.value = null
 
             try {
-                Log.d(TAG, "Llamando al repositorio...") // LOG 2
-
-                // Eliminamos el delay artificial
-                // delay(1000)
-
-                // 2. Intentar registrar en Firebase (almacenamos birthDate)
                 val user = userRepository.registerManual(name, birthDate, email, password)
 
-                Log.d(TAG, "Registro exitoso en Firestore. ID: ${user.id}") // LOG 3
+                // Guardar sesión al registrarse
+                saveSession(user.id)
 
-                // 3. Actualizar UI
                 currentUser.value = user
                 isLoggedIn.value = true
+                Log.d(TAG, "Registro exitoso")
 
             } catch (e: Exception) {
-                // AQUÍ ESTÁ EL ERROR REAL
-                Log.e(TAG, "CRASH en registro: ${e.message}", e) // LOG 4: Imprime el error completo
-
-                // Traducir errores comunes de Firestore para el usuario
+                Log.e(TAG, "CRASH en registro: ${e.message}", e)
                 errorMessage.value = when {
-                    e.message?.contains("PERMISSION_DENIED") == true -> "Error de permisos en base de datos."
+                    e.message?.contains("PERMISSION_DENIED") == true -> "Error de permisos."
                     e.message?.contains("UNAVAILABLE") == true -> "Sin conexión a internet."
-                    e.message?.contains("already registered") == true -> "El correo ya existe." // Mensaje de tu repo
+                    e.message?.contains("already registered") == true -> "El correo ya existe."
                     else -> "Error: ${e.message}"
                 }
                 isLoggedIn.value = false
             } finally {
                 isLoading.value = false
-                Log.d(TAG, "Proceso finalizado. IsLoading = false") // LOG 5
             }
         }
     }
 
-    // Observa los cambios del usuario en Firestore en tiempo real
     private var userObserverJob: Job? = null
 
     fun observeUser(userId: String) {
@@ -87,44 +131,33 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    // ... El resto de tus funciones (login, google, logout) se mantienen igual ...
-    // Copia el resto del archivo anterior aquí
-    // ------------------------------------------------------
     fun login(email: String, password: String) {
         viewModelScope.launch {
-            // 1. Validación básica de campos vacíos
             if (email.isBlank() || password.isBlank()) {
                 errorMessage.value = "Ingresa correo y contraseña."
                 return@launch
             }
 
-            // 2. LIMPIEZA DE DATOS (CRÍTICO 🚨)
-            // Quitamos espacios al inicio/final y convertimos a minúsculas para estandarizar
             val cleanEmail = email.trim().lowercase()
             val cleanPassword = password.trim()
-
-            Log.d(TAG, "Intentando Login con Email: '$cleanEmail'") // Verificamos qué se envía
-
             isLoading.value = true
             errorMessage.value = null
 
             try {
-                // 3. Llamada al repositorio
                 val user = userRepository.loginManual(cleanEmail, cleanPassword)
 
-                Log.d(TAG, "Login Éxitoso! Usuario: ${user.name} (${user.id})")
+                // Guardar sesión al hacer login
+                saveSession(user.id)
 
                 currentUser.value = user
                 isLoggedIn.value = true
+                Log.d(TAG, "Login Éxitoso")
 
             } catch (e: Exception) {
-                Log.e(TAG, "FALLÓ LOGIN: ${e.message}") // Ver el error exacto
-
-                // Mensajes amigables
+                Log.e(TAG, "FALLÓ LOGIN: ${e.message}")
                 errorMessage.value = when {
-                    e.message?.contains("Usuario no encontrado") == true -> "El correo no está registrado (Revisa mayúsculas/espacios)."
-                    e.message?.contains("Contraseña incorrecta") == true -> "La contraseña no coincide."
-                    e.message?.contains("Google") == true -> "Este correo usa inicio con Google."
+                    e.message?.contains("Usuario no encontrado") == true -> "Correo no registrado."
+                    e.message?.contains("Contraseña incorrecta") == true -> "Contraseña incorrecta."
                     else -> "Error: ${e.message}"
                 }
                 isLoggedIn.value = false
@@ -134,13 +167,16 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-
     fun handleGoogleLogin(googleId: String, name: String, email: String) {
         viewModelScope.launch {
             isLoading.value = true
             errorMessage.value = null
             try {
                 val user = userRepository.loginWithGoogle(googleId, name, email)
+
+
+                saveSession(user.id)
+
                 currentUser.value = user
                 isLoggedIn.value = true
             } catch (e: Exception) {
@@ -159,14 +195,16 @@ class AuthViewModel : ViewModel() {
     fun getLoggedUser(): User? = currentUser.value
 
     fun logout() {
-        // Asegura que esto ocurra en el hilo principal o actualice el estado inmediatamente
+        // Borrar sesión de SharedPreferences
+        prefs.edit().clear().apply()
+
         currentUser.value = null
         isLoggedIn.value = false
         errorMessage.value = null
-        isLoading.value = false // Asegúrate de apagar el loading por si acaso
+        isLoading.value = false
+        userObserverJob?.cancel()
     }
 
-    // Actualizar perfil del usuario
     suspend fun updateUserProfile(user: User) {
         try {
             userRepository.updateUser(user)

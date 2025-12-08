@@ -138,4 +138,9 @@
     <string name="notification_income_added">Ingreso agregado correctamente</string>
     <string name="notification_goal_achieved">¡Felicidades! Alcanzaste tu meta</string>
     <string name="notification_goal_created">¡Meta creada correctamente!</string>
+
+    <!-- graficas -->
+    <string name="msg_piechart">Iniciamos con tu primer movimiento</string>
+    <string name="new_month">Sin movimientos este mes</string>
+
 </resources>

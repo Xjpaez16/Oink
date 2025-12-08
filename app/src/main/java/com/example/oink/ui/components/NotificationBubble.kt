@@ -3,6 +3,7 @@ package com.example.oink.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,7 +41,9 @@ fun NotificationBubble(
                     .wrapContentSize()
                     .shadow(6.dp, RoundedCornerShape(12.dp)),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF2997FD))
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = BorderStroke(2.dp, Color(0xFF2997FD)),
+
             ) {
                 Row(
                     modifier = Modifier
@@ -52,7 +55,7 @@ fun NotificationBubble(
                         contentDescription = "notification_icon",
                         modifier = Modifier
                             .size(36.dp),
-                        colorFilter = ColorFilter.tint(Color.Black)
+                        colorFilter = ColorFilter.tint(Color(0XFF2997FD))
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(

@@ -1,6 +1,8 @@
 package com.example.oink.ui.profile
 
+import android.graphics.BitmapFactory
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -28,7 +30,9 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
-import com.example.oink.data.model.User
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.graphics.asImageBitmap
+import com.example.oink.R
 import com.example.oink.ui.theme.robotoBoldStyle
 import com.example.oink.ui.theme.robotoMediumStyle
 import com.example.oink.ui.theme.robotoRegularStyle
@@ -48,11 +52,7 @@ fun ProfileScreen(
     // Estados
     val isLoggedIn by viewModel.isLoggedIn
 
-    // ---------------------------------------------------------
-    // CORRECCIÓN CRÍTICA: DETECCIÓN DE LOGOUT
-    // Este LaunchedEffect es el ÚNICO responsable de navegar
-    // cuando la sesión se cierra.
-    // ---------------------------------------------------------
+
     LaunchedEffect(isLoggedIn) {
         if (!isLoggedIn) {
             onClose()
@@ -79,31 +79,73 @@ fun ProfileScreen(
     }
 
     // DIÁLOGO DE CONFIRMACIÓN
+    val logo = remember {
+        runCatching {
+            val inputStream = context.assets.open("logo.png")
+            BitmapFactory.decodeStream(inputStream)?.asImageBitmap()
+        }.getOrNull()
+    }
+
+// DIÁLOGO DE CONFIRMACIÓN (Estilo Personalizado)
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
-            title = { Text(stringResource(id = com.example.oink.R.string.logout_title)) },
-            text = { Text(stringResource(id = com.example.oink.R.string.logout_message)) },
+            containerColor = Color.White,
+            icon = {
+                // Icono del logo superior
+                logo?.let {
+                    Image(
+                        bitmap = it,
+                        contentDescription = stringResource(R.string.desc_logo),
+                        modifier = Modifier
+                            .size(90.dp)
+                            .padding(bottom = 8.dp)
+                    )
+                }
+            },
+            title = {
+                Text(
+                    text = stringResource(R.string.logout_title),
+                    style = robotoBoldStyle(
+                        fontSize = 28.sp,
+                        color = Color.Black
+                    ),
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.logout_message),
+                    style = robotoRegularStyle(
+                        fontSize = 16.sp,
+                        color = Color.Black
+                    ),
+                    modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+                )
+            },
             confirmButton = {
-                Button(
+                TextButton(
                     onClick = {
                         showLogoutDialog = false
-                        // CORRECCIÓN: Solo llamamos al ViewModel.
-                        // El LaunchedEffect de arriba se encargará de llamar a onClose()
-                        // automáticamente cuando isLoggedIn cambie a false.
                         viewModel.logout()
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                    }
                 ) {
-                    Text(stringResource(id = com.example.oink.R.string.logout_confirm), color = Color.White)
+                    Text(
+                        text = stringResource(R.string.logout_confirm),
+                        color = Color(0xFFD32F2F), // Rojo para indicar acción destructiva (salir)
+                        style = robotoBoldStyle(fontSize = 16.sp)
+                    )
                 }
             },
             dismissButton = {
-                Button(
-                    onClick = { showLogoutDialog = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D3685))
+                TextButton(
+                    onClick = { showLogoutDialog = false }
                 ) {
-                    Text(stringResource(id = com.example.oink.R.string.logout_cancel), color = Color.White)
+                    Text(
+                        text = stringResource(R.string.logout_cancel),
+                        color = Color(0xFF2997FD), // Azul para cancelar
+                        style = robotoBoldStyle(fontSize = 16.sp)
+                    )
                 }
             }
         )

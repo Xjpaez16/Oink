@@ -313,7 +313,12 @@ fun Enter_money_view(
                 }
             }
         }
-        NotificationBubble(visible = showNotification, message = notifyText)
+        NotificationBubble(visible = showNotification,
+            message = notifyText,
+            iconRes =R.drawable.logo,
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+        )
     }
 }
 

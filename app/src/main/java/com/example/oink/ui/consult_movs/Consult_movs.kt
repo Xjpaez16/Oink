@@ -37,7 +37,7 @@ fun Consult_movs_view(
 
     Scaffold(
         bottomBar = { BottomNavBar(navController) },
-        containerColor = Color(0xFFF8FAFF)
+        containerColor = Color.White
     ) { innerPadding ->
 
         LazyColumn(

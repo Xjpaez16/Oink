@@ -19,6 +19,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
+        window.setBackgroundDrawableResource(android.R.color.white)
         setContent {
             val navController = rememberNavController()
             AppNavGraph(navController = navController)

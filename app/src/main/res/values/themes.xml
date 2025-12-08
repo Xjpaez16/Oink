@@ -13,5 +13,10 @@
         <item name="android:colorAccent">#2997FD</item>
         <item name="android:colorControlActivated">#2997FD</item>
     </style>
-    <style name="Theme.Oink" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Oink" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:statusBarColor">@android:color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
 </resources>

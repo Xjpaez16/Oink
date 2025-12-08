@@ -321,7 +321,12 @@ fun Enter_expense_view(
                 }
             }
         }
-        NotificationBubble(visible = showNotification, message = notifyText)
+        NotificationBubble(visible = showNotification,
+            message = notifyText,
+            iconRes =R.drawable.logo,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                )
     }
 }
 

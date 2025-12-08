@@ -1,5 +1,8 @@
 package com.example.oink.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,224 +45,245 @@ fun AppNavGraph(navController: NavHostController) {
     val expenseRecurringViewModel: ExpenseRecurringMovementViewModel = viewModel()
 
     val isLoggedIn by authViewModel.isLoggedIn
+    val isLoading by authViewModel.isLoading
 
-    LaunchedEffect(isLoggedIn) {
-        if (isLoggedIn) {
-            navController.navigate(NavRoutes.Home.route) {
-                popUpTo(NavRoutes.Onboarding.route) { inclusive = true }
-                popUpTo(NavRoutes.Login.route) { inclusive = true }
-            }
-        }
-        // Note: Logout navigation is handled by ProfileScreen's LaunchedEffect -> onClose()
+
+    if (isLoading) {
+        SplashScreen()
     }
 
-    NavHost(
-        navController = navController,
-        startDestination = NavRoutes.Splash.route
-    ) {
-        composable(NavRoutes.Splash.route) {
-            SplashScreen(
-                onTimeout = {
-                    navController.navigate(NavRoutes.Onboarding.route) {
-                        popUpTo(NavRoutes.Splash.route) { inclusive = true }
-                    }
+    else {
+
+
+        val startDestination = if (isLoggedIn) NavRoutes.Home.route else NavRoutes.Onboarding.route
+
+        LaunchedEffect(isLoggedIn) {
+            if (isLoggedIn) {
+                navController.navigate(NavRoutes.Home.route) {
+                    popUpTo(NavRoutes.Onboarding.route) { inclusive = true }
+                    popUpTo(NavRoutes.Login.route) { inclusive = true }
+                    popUpTo(NavRoutes.Splash.route) { inclusive = true }
                 }
-            )
-        }
-
-        composable(NavRoutes.Onboarding.route) {
-            StartUpScreen(
-                onRegisterClick = {
-                    navController.navigate(NavRoutes.Register.route) {
-                        popUpTo(NavRoutes.Onboarding.route)
-                    }
-                },
-                onLoginClick = {
-                    navController.navigate(NavRoutes.Login.route) {
-                        popUpTo(NavRoutes.Onboarding.route)
-                    }
-                }
-            )
-        }
-
-        composable(NavRoutes.Login.route) {
-            LoginScreen(
-                viewModel = authViewModel,
-                onBackClick = { navController.popBackStack() }
-            )
-        }
-
-        composable(NavRoutes.Register.route) {
-            RegisterScreen(
-                viewModel = authViewModel,
-                onBackClick = { navController.popBackStack() })
-        }
-
-        composable(NavRoutes.Home.route) {
-            val user = authViewModel.getLoggedUser()
-            if (user != null) {
-                BalanceScreen(
-                    viewModel = balanceViewModel,
-                    userName = user.name,
-                    authViewModel = authViewModel,
-                    onNavigateToIncome = { navController.navigate(NavRoutes.Income.route) },
-                    onNavigateToExpenses = { navController.navigate(NavRoutes.Expenses.route) },
-                    navController = navController
-                )
             }
         }
 
-        // CORRECCIÓN 2: Rutas únicas (se eliminaron duplicados)
-
-        composable(NavRoutes.Expenses.route) {
-            ExpenseScreen(
-                type = MovementType.EXPENSE,
-                viewModel = expenseIncomeViewModel,
-                authViewModel = authViewModel,
-                onNavigateToIncome = { navController.navigate(NavRoutes.Income.route) },
-                onNavigateToEnter = { navController.navigate(NavRoutes.insert_expenses.route) },
-                navController = navController,
-            )
-        }
-
-        composable(NavRoutes.Income.route) {
-            IncomeScreen(
-                type = MovementType.INCOME,
-                viewModel = expenseIncomeViewModel,
-                authViewModel = authViewModel,
-                onNavigateToExpense = { navController.navigate(NavRoutes.Expenses.route) },
-                onNavigateToEnter = { navController.navigate(NavRoutes.insert_income.route) },
-                navController = navController,
-            )
-        }
-
-        composable(
-            route = NavRoutes.EditMovement.route,
-            arguments = listOf(
-                navArgument("movementId") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val movementId = backStackEntry.arguments?.getString("movementId") ?: ""
-            EditMovementView(
-                movementId = movementId,
-                onBackClick = { navController.popBackStack() }
-            )
-        }
-
-        composable(NavRoutes.insert_expenses.route) {
-            val user = authViewModel.getLoggedUser()
-            if (user != null) {
-                Enter_expense_view(
-                    movementViewModel = expensemovementViewModel,
-                    recurringViewModel = expenseRecurringViewModel,
-                    userId = user.id,
-                    onBackClick = {
-                        navController.popBackStack()
+        NavHost(
+            navController = navController,
+            startDestination = startDestination // <--- USAMOS LA RUTA DINÁMICA AQUÍ
+        ) {
+            composable(NavRoutes.Splash.route) {
+                SplashScreen(
+                    onTimeout = {
+                        navController.navigate(NavRoutes.Onboarding.route) {
+                            popUpTo(NavRoutes.Splash.route) { inclusive = true }
+                        }
                     }
                 )
             }
-        }
 
-        composable(NavRoutes.insert_income.route) {
-            val user = authViewModel.getLoggedUser()
-            if (user != null) {
-                Enter_money_view(
-                    movementViewModel = expensemovementViewModel,
-                    recurringViewModel = expenseRecurringViewModel,
-                    userId = user.id,
+            composable(NavRoutes.Onboarding.route) {
+                StartUpScreen(
+                    onRegisterClick = {
+                        navController.navigate(NavRoutes.Register.route) {
+                            popUpTo(NavRoutes.Onboarding.route)
+                        }
+                    },
+                    onLoginClick = {
+                        navController.navigate(NavRoutes.Login.route) {
+                            popUpTo(NavRoutes.Onboarding.route)
+                        }
+                    }
+                )
+            }
+
+            composable(NavRoutes.Login.route) {
+                LoginScreen(
+                    viewModel = authViewModel,
                     onBackClick = { navController.popBackStack() }
                 )
             }
-        }
 
-        composable(NavRoutes.Report.route) {
-            val user = authViewModel.getLoggedUser()
-            if (user != null) {
-                ReportScreen(
+            composable(NavRoutes.Register.route) {
+                RegisterScreen(
+                    viewModel = authViewModel,
+                    onBackClick = { navController.popBackStack() })
+            }
+
+            composable(
+                route = NavRoutes.Home.route,
+                enterTransition = { fadeIn(animationSpec = tween(300)) },
+                exitTransition = { fadeOut(animationSpec = tween(300)) }
+            ) {
+                val user = authViewModel.getLoggedUser()
+                if (user != null) {
+                    BalanceScreen(
+
+                        viewModel = balanceViewModel,
+                        userName = user.name,
+                        authViewModel = authViewModel,
+                        onNavigateToIncome = { navController.navigate(NavRoutes.Income.route) },
+                        onNavigateToExpenses = { navController.navigate(NavRoutes.Expenses.route) },
+                        navController = navController
+                    )
+                }
+            }
+
+            composable(NavRoutes.Expenses.route) {
+                ExpenseScreen(
+                    type = MovementType.EXPENSE,
+                    viewModel = expenseIncomeViewModel,
+                    authViewModel = authViewModel,
+                    onNavigateToIncome = { navController.navigate(NavRoutes.Income.route) },
+                    onNavigateToEnter = { navController.navigate(NavRoutes.insert_expenses.route) },
                     navController = navController,
-                    userName = user.name,
+                )
+            }
+
+            composable(NavRoutes.Income.route) {
+                IncomeScreen(
+                    type = MovementType.INCOME,
+                    viewModel = expenseIncomeViewModel,
+                    authViewModel = authViewModel,
+                    onNavigateToExpense = { navController.navigate(NavRoutes.Expenses.route) },
+                    onNavigateToEnter = { navController.navigate(NavRoutes.insert_income.route) },
+                    navController = navController,
+                )
+            }
+
+            composable(
+                route = NavRoutes.EditMovement.route,
+                arguments = listOf(
+                    navArgument("movementId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val movementId = backStackEntry.arguments?.getString("movementId") ?: ""
+                EditMovementView(
+                    movementId = movementId,
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            composable(NavRoutes.insert_expenses.route) {
+                val user = authViewModel.getLoggedUser()
+                if (user != null) {
+                    Enter_expense_view(
+                        movementViewModel = expensemovementViewModel,
+                        recurringViewModel = expenseRecurringViewModel,
+                        userId = user.id,
+                        onBackClick = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+            }
+
+            composable(NavRoutes.insert_income.route) {
+                val user = authViewModel.getLoggedUser()
+                if (user != null) {
+                    Enter_money_view(
+                        movementViewModel = expensemovementViewModel,
+                        recurringViewModel = expenseRecurringViewModel,
+                        userId = user.id,
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
+            }
+
+            composable(
+                route = NavRoutes.Report.route,
+                enterTransition = { fadeIn(animationSpec = tween(300)) },
+                exitTransition = { fadeOut(animationSpec = tween(300)) }
+            ) {
+                val user = authViewModel.getLoggedUser()
+                if (user != null) {
+                    ReportScreen(
+                        navController = navController,
+                        userName = user.name,
+                        authViewModel = authViewModel
+                    )
+                }
+            }
+
+            composable(
+                route = NavRoutes.SelectGoal.route,
+                enterTransition = { fadeIn(animationSpec = tween(300)) },
+                exitTransition = { fadeOut(animationSpec = tween(300)) }
+            ) {
+                val user = authViewModel.getLoggedUser()
+                if (user != null) {
+                    select_goals_view(
+                        navController = navController,
+                        userName = user.name,
+                        authViewModel = authViewModel,
+                        onNavigateToadd = { navController.navigate(NavRoutes.Goal.route) }
+                    )
+                }
+            }
+
+            composable(NavRoutes.Goal.route) {
+                val goalViewModel: GoalViewModel = viewModel()
+                val user = authViewModel.getLoggedUser()
+                if (user != null) {
+                    GoalScreen(
+                        userName = user.name,
+                        viewModel = goalViewModel,
+                        authViewModel = authViewModel,
+                        onClose = { navController.popBackStack() },
+                        navController = navController
+                    )
+                }
+            }
+
+            composable(
+                route = NavRoutes.DepositGoal.route,
+                arguments = listOf(
+                    navArgument("goalId") { type = NavType.StringType },
+                    navArgument("goalName") { type = NavType.StringType },
+                    navArgument("goalPrice") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val goalId = backStackEntry.arguments?.getString("goalId") ?: ""
+                val goalName =
+                    backStackEntry.arguments?.getString("goalName") ?: "Meta Desconocida"
+                val goalPrice =
+                    backStackEntry.arguments?.getString("goalPrice") ?: "0"
+                val user = authViewModel.getLoggedUser()
+
+                if (user != null && goalId.isNotBlank()) {
+                    GoalDepositScreen(
+                        userName = user.name,
+                        goalId = goalId,
+                        goalName = goalName,
+                        goalPrice = goalPrice,
+                        authViewModel = authViewModel,
+                        onClose = { navController.popBackStack() }
+                    )
+                } else {
+                    navController.popBackStack()
+                }
+            }
+
+            composable(
+                route = NavRoutes.Consult_movs.route,
+                enterTransition = { fadeIn(animationSpec = tween(300)) },
+                exitTransition = { fadeOut(animationSpec = tween(300)) }
+            ) {
+                Consult_movs_view(
+                    navController = navController,
                     authViewModel = authViewModel
                 )
             }
-        }
-
-        composable(NavRoutes.SelectGoal.route) {
-            val user = authViewModel.getLoggedUser()
-            if (user != null) {
-                select_goals_view(
-                    navController = navController,
-                    userName = user.name,
-                    authViewModel = authViewModel,
-                    onNavigateToadd = { navController.navigate(NavRoutes.Goal.route) }
-                )
-            }
-        }
-
-        composable(NavRoutes.Goal.route) {
-            val goalViewModel: GoalViewModel = viewModel()
-            val user = authViewModel.getLoggedUser()
-            if (user != null) {
-                GoalScreen(
-                    userName = user.name,
-                    viewModel = goalViewModel,
-                    authViewModel = authViewModel,
-                    onClose = { navController.popBackStack() },
-                    navController = navController
-                )
-            }
-        }
-
-        composable(
-            route = NavRoutes.DepositGoal.route,
-            arguments = listOf(
-                navArgument("goalId") { type = NavType.StringType },
-                navArgument("goalName") { type = NavType.StringType },
-                navArgument("goalPrice") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val goalId = backStackEntry.arguments?.getString("goalId") ?: ""
-            val goalName =
-                backStackEntry.arguments?.getString("goalName") ?: "Meta Desconocida"
-            val goalPrice =
-                backStackEntry.arguments?.getString("goalPrice") ?: "0"
-            val user = authViewModel.getLoggedUser()
-
-            if (user != null && goalId.isNotBlank()) {
-                GoalDepositScreen(
-                    userName = user.name,
-                    goalId = goalId,
-                    goalName = goalName,
-                    goalPrice = goalPrice,
-                    authViewModel = authViewModel,
-                    onClose = { navController.popBackStack() }
-                )
-            } else {
-                navController.popBackStack()
-            }
-        }
-
-        composable(NavRoutes.Consult_movs.route) {
-            Consult_movs_view(
-                navController = navController,
-                authViewModel = authViewModel
-            )
-        }
-
-        composable(NavRoutes.Profile.route) {
-            val user = authViewModel.getLoggedUser()
-            // Permitimos renderizar Profile incluso si user es null temporalmente para evitar parpadeos,
-            // pero idealmente validamos.
-            ProfileScreen(
-                viewModel = authViewModel,
-                onClose = {
-                    // AL CERRAR SESIÓN:
-                    // 1. Navegar al Login (o Onboarding si prefieres)
-                    navController.navigate(NavRoutes.Onboarding.route) {
-                        // 2. Limpiar TODA la pila de navegación para que no pueda volver atrás
-                        popUpTo(0) { inclusive = true }
+            composable(NavRoutes.Profile.route) {
+                ProfileScreen(
+                    viewModel = authViewModel,
+                    onClose = {
+                        // Al cerrar sesión volvemos al Onboarding
+                        navController.navigate(NavRoutes.Onboarding.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     }
 }

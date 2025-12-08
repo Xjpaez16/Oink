@@ -33,16 +33,33 @@ import com.example.oink.ui.theme.robotoBoldStyle
 fun PieChartWithIcons(
     movements: List<Movement>
 ) {
+    val totalIncome = movements
+        .filter { it.type == MovementType.INCOME.name }
+        .sumOf { it.amount.toDouble() }
 
-    val slices = movements.map { movement ->
-        PieChartData.Slice(
-            value = movement.amount.toFloat(),
+    val totalExpense = movements
+        .filter { it.type == MovementType.EXPENSE.name }
+        .sumOf { it.amount.toDouble() }
 
-            color = if (movement.type == MovementType.INCOME.name) Color(0xFF2997FD) else Color(0xFF0D3685)
+    val slices = mutableListOf<PieChartData.Slice>()
+
+    if (totalIncome > 0) {
+        slices.add(
+            PieChartData.Slice(
+                value = totalIncome.toFloat(),
+                color = Color(0xFF2997FD)
+            )
         )
     }
 
-
+    if (totalExpense > 0) {
+        slices.add(
+            PieChartData.Slice(
+                value = totalExpense.toFloat(),
+                color = Color(0xFF0D3685)
+            )
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -50,16 +67,45 @@ fun PieChartWithIcons(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        PieChart(
-            pieChartData = PieChartData(slices),
-            sliceDrawer = SimpleSliceDrawer(100f), // Grosor del anillo
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp)
-        )
+        if (slices.isNotEmpty()) {
+            PieChart(
+                pieChartData = PieChartData(slices),
+                sliceDrawer = SimpleSliceDrawer(100f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+            )
+        } else {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+            ) {
+                PieChart(
+                    pieChartData = PieChartData(
+                        listOf(
+                            PieChartData.Slice(
+                                value = 1f,
+                                color = Color(0xFFE0E0E0)
+                            )
+                        )
+                    ),
+                    sliceDrawer = SimpleSliceDrawer(100f),
+                    modifier = Modifier.matchParentSize()
+                )
+
+                Text(
+                    text = stringResource(R.string.msg_piechart) ,
+                    style = robotoBoldStyle(
+                        fontSize = 16.sp,
+                        color = Color.Gray
+                    )
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
-
 
         Row(
             horizontalArrangement = Arrangement.Center,
@@ -68,7 +114,6 @@ fun PieChartWithIcons(
                 .fillMaxWidth()
                 .offset(y = (20).dp)
         ) {
-            // Item Ingresos
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start,
@@ -81,16 +126,14 @@ fun PieChartWithIcons(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
 
-
                 Text(
-                    text = stringResource(R.string.pie_income), // "Ingresos"
+                    text = stringResource(R.string.pie_income),
                     style = robotoBoldStyle(
                         fontSize = 16.sp,
                         color = Color.Black
                     ),
                 )
             }
-
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -104,9 +147,8 @@ fun PieChartWithIcons(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
 
-
                 Text(
-                    text = stringResource(R.string.pie_expenses), // "Gastos"
+                    text = stringResource(R.string.pie_expenses),
                     style = robotoBoldStyle(
                         fontSize = 16.sp,
                         color = Color.Black
@@ -116,3 +158,4 @@ fun PieChartWithIcons(
         }
     }
 }
+

@@ -58,7 +58,7 @@ fun select_goals_view(
                 Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(R.string.desc_add_goal))
             }
         },
-        containerColor = Color(0xFFF8FAFF)
+        containerColor = Color.White
     ) { innerPadding ->
 
         LazyColumn(
