@@ -85,7 +85,7 @@ class GoalDepositViewModel : ViewModel() {
             try {
                 // Deja que solo el repositorio trabaje
                 repository.deleteDeposit(deposit)
-                // ELIMINA la línea: depositsList.remove(deposit)
+
                 messageState.value = "Abono eliminado con éxito."
             } catch (e: Exception) {
                 // ...

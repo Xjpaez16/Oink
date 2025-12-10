@@ -6,7 +6,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
@@ -71,14 +73,19 @@ fun Enter_expense_view(
             showNotification = false
         }
     }
-
+    val scrollState = rememberScrollState()
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White),
         contentAlignment = Alignment.TopStart
     ) {
-        Column(modifier = Modifier.padding(top = 148.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(bottom = 50.dp)
+        ) {
 
             // Título
             Text(
@@ -87,6 +94,7 @@ fun Enter_expense_view(
                 fontSize = 64.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 30.dp)
+
             )
 
             Spacer(modifier = Modifier.height(33.dp))
@@ -383,7 +391,8 @@ fun FrequencyDropdown(
             frequencies.forEach { (label, value) ->
                 DropdownMenuItem(
                     text = {
-                        Text(label,
+                        Text(
+                            label,
                             style = robotoBoldStyle(
                                 fontSize = 14.sp,
                                 color = Color.White

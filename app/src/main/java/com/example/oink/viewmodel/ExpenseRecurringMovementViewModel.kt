@@ -10,9 +10,7 @@ class ExpenseRecurringMovementViewModel(
     private val repo: RecurringMovementRepository = RecurringMovementRepository()
 ) : ViewModel() {
 
-    // ------------------------------------------------------------
-    // 🟢 Crear movimiento recurrente
-    // ------------------------------------------------------------
+
     fun createRecurringMovement(item: RecurringMovement, onSuccess: (() -> Unit)? = null) {
         viewModelScope.launch {
             try {
@@ -26,5 +24,5 @@ class ExpenseRecurringMovementViewModel(
         }
     }
 
-    // Puedes añadir aquí otras funciones (update, delete) para movimientos recurrentes
+
 }

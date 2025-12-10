@@ -49,7 +49,21 @@ fun BottomNavBar(
                 modifier = Modifier.size(24.dp)
             ) },
             selected = currentRoute == NavRoutes.Home.route,
-            onClick = { navigateTo(NavRoutes.Home.route) },
+            onClick = {
+                if (currentRoute != NavRoutes.Home.route) {
+                    navController.navigate(NavRoutes.Home.route) {
+
+                        popUpTo(navController.graph.findStartDestination().id) {
+
+                            saveState = false
+                        }
+
+                        launchSingleTop = true
+
+                        restoreState = false
+                    }
+                }
+            },
             label = {
                 Text(
                     stringResource(R.string.nav_home),
