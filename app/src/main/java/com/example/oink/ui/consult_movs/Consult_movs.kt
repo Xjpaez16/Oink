@@ -14,9 +14,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource // Importación necesaria
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.oink.R // Importación necesaria para acceder a los strings
 import com.example.oink.ui.components.BottomNavBar
 import com.example.oink.ui.components.MovementItem
 import com.example.oink.viewmodel.AuthViewModel
@@ -50,20 +52,25 @@ fun Consult_movs_view(
             // 1. Calendario y título
             item {
                 Spacer(modifier = Modifier.height(24.dp))
+
+                // CORREGIDO: Título con stringResource
                 Text(
-                    text = "Consultar Movimientos",
+                    text = stringResource(R.string.consult_title),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF0D3685)
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
+
+                // CORREGIDO: Subtítulo con stringResource
                 Text(
-                    text = "Selecciona una fecha en el calendario para ver todos tus ingresos y gastos de ese día.",
+                    text = stringResource(R.string.consult_subtitle),
                     textAlign = TextAlign.Center,
                     color = Color.Gray
                 )
-                Spacer(modifier = Modifier.height(16.dp))
 
+                Spacer(modifier = Modifier.height(16.dp))
 
                 CalendarVisible { selectedDate ->
                     currentUser?.id?.let { userId ->
@@ -87,8 +94,9 @@ fun Consult_movs_view(
                     }
                 } else if (searchPerformed) {
                     item {
+                        // CORREGIDO: Mensaje de "sin resultados" con stringResource
                         Text(
-                            text = "No se encontraron movimientos para la fecha seleccionada.",
+                            text = stringResource(R.string.consult_no_results),
                             color = Color.Gray,
                             modifier = Modifier.padding(top = 16.dp)
                         )
@@ -126,7 +134,6 @@ fun CalendarVisible(
         state = datePickerState,
         showModeToggle = true,
         colors = DatePickerDefaults.colors(
-
             selectedDayContainerColor = Color(0xFF2997FD),
             todayDateBorderColor = Color(0xFF2997FD),
             todayContentColor = Color(0xFF0D3685)

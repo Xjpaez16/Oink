@@ -46,6 +46,9 @@
     <string name="msg_creating_account">Creating your account...</string>
     <string name="msg_register_success">Registration successful! Welcome to Oink...</string>
     <string name="btn_google">Continue with Google</string>
+    <string name="msg_logging_in">Logging in...</string>
+    <string name="msg_welcome">Welcome!</string>
+
     <!-- HOME / BALANCE -->
     <string name="greeting_mr">Hello Mr %1$s</string>
     <string name="balance_subtitle">Take a look at your finances</string>
@@ -105,15 +108,24 @@
     <string name="report_spent_most">You spent most on:</string>
     <string name="report_earned_most">You earned most from:</string>
     <string name="report_no_data_range">No movements in this date range</string>
+    <string name="report_none">None</string>
+    <string name="report_breakdown">Category breakdown</string>
+
+    <!-- REPORT CHART STRINGS (NUEVOS) -->
+    <string name="report_expenses_category">Expenses by Category</string>
+    <string name="report_income_category">Income by Category</string>
+    <string name="report_no_expenses">No expenses recorded</string>
+    <string name="report_no_income">No income recorded</string>
 
     <!-- CALENDAR -->
     <string name="date_selected_label">Selected date: %1$s</string>
+
     <!-- DIALOGO DE CANCELACION -->
     <string name="dialog_cancel_title">Are you sure you want to delete this move?</string>
     <string name="title_cancel">Delete Movement</string>
     <string name="confirm_cancel">Delete</string>
     <string name="cancel_cancel">Cancel</string>
-    
+
     <!-- PROFILE -->
     <string name="profile_title">Profile</string>
     <string name="profile_info_title">Personal Information</string>
@@ -133,7 +145,12 @@
     <string name="notification_goal_achieved">Congratulations! You reached your goal</string>
     <string name="notification_goal_created">Goal created successfully!</string>
 
-    <!-- graficas -->
+    <!-- GRAFICAS -->
     <string name="msg_piechart">Let\'s start with your first move</string>
     <string name="new_month">No movement this month</string>
+
+    <!-- CONSULT MOVEMENTS (NUEVOS AGREGADOS) -->
+    <string name="consult_title">Check your moves</string>
+    <string name="consult_subtitle">Select a date to see your expenses and income</string>
+    <string name="consult_no_results">No movements found for this date</string>
 </resources>

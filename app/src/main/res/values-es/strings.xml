@@ -48,6 +48,7 @@
     <string name="btn_google">Continuar con Google</string>
     <string name="msg_logging_in">Iniciando sesión...</string>
     <string name="msg_welcome">¡Bienvenido!</string>
+
     <!-- HOME / BALANCE (BalanceScreen.kt) -->
     <string name="greeting_mr">Hola Sr %1$s</string>
     <string name="balance_subtitle">Echa un vistazo a tus finanzas</string>
@@ -110,8 +111,20 @@
     <string name="report_breakdown">Desglose por categoría</string>
     <string name="report_no_data_range">No hay movimientos en este rango de fechas</string>
 
-    <!-- CALENDARIO -->
+    <!-- REPORT CHART STRINGS (NUEVOS) -->
+    <string name="report_expenses_category">Gastos por Categoría</string>
+    <string name="report_income_category">Ingresos por Categoría</string>
+    <string name="report_no_expenses">Sin gastos registrados</string>
+    <string name="report_no_income">Sin ingresos registrados</string>
+
+    <!-- CALENDAR -->
     <string name="date_selected_label">Fecha seleccionada: %1$s</string>
+
+    <!-- DIALOGO DE CANCELACION -->
+    <string name="dialog_cancel_title">¿Estás seguro de que quieres eliminar este movimiento?</string>
+    <string name="title_cancel">Eliminar Movimiento</string>
+    <string name="confirm_cancel">Eliminar</string>
+    <string name="cancel_cancel">Cancelar</string>
 
     <!-- PROFILE -->
     <string name="profile_title">Perfil</string>
@@ -132,6 +145,12 @@
     <string name="notification_goal_achieved">¡Felicidades! Alcanzaste tu meta</string>
     <string name="notification_goal_created">¡Meta creada correctamente!</string>
 
+    <!-- GRAFICAS -->
     <string name="msg_piechart">Iniciamos con tu primer movimiento</string>
     <string name="new_month">Sin movimientos este mes</string>
+
+    <!-- CONSULT MOVEMENTS (NUEVOS AGREGADOS) -->
+    <string name="consult_title">Consulta tus movimientos</string>
+    <string name="consult_subtitle">Selecciona una fecha para ver tus gastos e ingresos</string>
+    <string name="consult_no_results">No se encontraron movimientos para la fecha seleccionada</string>
 </resources>

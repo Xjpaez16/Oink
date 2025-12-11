@@ -176,9 +176,14 @@ fun ReportScreen(
                             // Lógica para diferenciar las páginas
                             val isExpensePage = page == 0
 
-                            // Configuración dinámica según la página
-                            val title = if (isExpensePage) "Gastos por Categoría" else "Ingresos por Categoría"
+                            // Configuración dinámica usando stringResource
+                            val title = if (isExpensePage)
+                                stringResource(R.string.report_expenses_category)
+                            else
+                                stringResource(R.string.report_income_category)
+
                             val chartData = if (isExpensePage) viewModel.categoryTotals else viewModel.incomeTotals
+
                             // Color azul normal para gastos, Azul oscuro para ingresos
                             val titleColor = if (isExpensePage) Color(0xFF1C60E7) else Color(0xFF0D47A1)
 
@@ -200,7 +205,10 @@ fun ReportScreen(
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
-                                            text = if (isExpensePage) "Sin gastos registrados" else "Sin ingresos registrados",
+                                            text = if (isExpensePage)
+                                                stringResource(R.string.report_no_expenses)
+                                            else
+                                                stringResource(R.string.report_no_income),
                                             color = Color.Gray
                                         )
                                     }
@@ -295,6 +303,8 @@ fun ReportScreen(
                     Text(viewModel.topIncomeCategory ?: stringResource(R.string.report_none), fontSize = 16.sp)
                 }
             }
+
+            Spacer(Modifier.height(80.dp)) // Espacio final
         }
     }
 }

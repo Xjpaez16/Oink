@@ -87,6 +87,7 @@ fun Enter_expense_view(
                 .padding(bottom = 50.dp)
         ) {
 
+            Spacer(modifier = Modifier.height(80.dp))
             // Título
             Text(
                 text = stringResource(R.string.title_expenses_entry),

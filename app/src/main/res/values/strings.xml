@@ -143,4 +143,14 @@
     <string name="msg_piechart">Iniciamos con tu primer movimiento</string>
     <string name="new_month">Sin movimientos este mes</string>
 
+    <string name="consult_title">Consulta tus movimientos</string>
+    <string name="consult_subtitle">Selecciona una fecha para ver tus gastos e ingresos</string>
+    <string name="consult_no_results">No se encontraron movimientos para la fecha seleccionada</string>
+
+    <!-- REPORT CHART STRINGS (NUEVOS) -->
+    <string name="report_expenses_category">Gastos por Categoría</string>
+    <string name="report_income_category">Ingresos por Categoría</string>
+    <string name="report_no_expenses">Sin gastos registrados</string>
+    <string name="report_no_income">Sin ingresos registrados</string>
+
 </resources>

@@ -12,7 +12,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-// CAMBIO 1: Cambiar ViewModel() por AndroidViewModel(application) para tener acceso al Contexto
+
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     private val userRepository = UserRepository()
